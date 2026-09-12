@@ -55,7 +55,7 @@ async def fetch_leg(pg, dcity, acity, date):
     return parse(await pg.inner_text('body'))
 
 async def run():
-    result = {'parts': [], 'alerts': [], 'fails': []}
+    result = {'parts': [], 'alerts': [], 'fails': [], 'best': {}}
     async with async_playwright() as p:
         b = await p.chromium.launch(headless=True)
         ctx = await b.new_context(locale='ko-KR', user_agent=UA, viewport={'width': 1280, 'height': 900})
@@ -67,6 +67,7 @@ async def run():
                 if not usable:
                     raise RuntimeError('항공편 없음')
                 best = min(usable, key=lambda f: f[3])
+                result['best'][name] = list(best)
                 result['parts'].append(f"{name} 최저 {best[0]} {best[1]} {best[3]:,}")
                 for f in fl:
                     base = BASE.get((name, f[0], f[1]))
@@ -81,7 +82,7 @@ def check():
     try:
         return asyncio.run(run())
     except Exception as e:
-        return {'parts': ['항공 전체 조회 실패'], 'alerts': [], 'fails': ['all']}
+        return {'parts': ['항공 전체 조회 실패'], 'alerts': [], 'fails': ['항공 전체'], 'best': {}}
 
 if __name__ == '__main__':
     r = check()
