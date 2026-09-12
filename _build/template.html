@@ -1,0 +1,576 @@
+<title>엄마 칠순 크루즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Dongle:wght@700&family=Gamja+Flower&family=Nothing+You+Could+Do&family=Gaegu:wght@400;700&display=swap">
+<style>
+:root{
+ --cream:#fbf6ee; --cream2:#f6eee1; --paper:#fffdf8;
+ --ink:#4a3728; --ink2:#7d6753; --line:#e6d9c6;
+ --terra:#c4703f; --sage:#8fae96; --rose:#d99b9b; --gold:#d9a441; --sea:#3f7f97; --sea2:#e4eff2;
+ --f-ttl:'Hakgyoansim Allimjang TTF B','Hakgyoansim Allimjang TTF R',Jua,sans-serif;
+ --f-hd:Jua,'Hakgyoansim Allimjang TTF B',sans-serif;
+ --f-num:Dongle,Jua,sans-serif;
+ --f-hand:'Gamja Flower',Gaegu,cursive;
+ --f-en:'Nothing You Could Do','Gamja Flower',cursive;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);
+ font-family:Pretendard,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+ font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+ font-variant-numeric:tabular-nums}
+b{font-weight:800;color:var(--ink)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+ background-image:radial-gradient(rgba(120,90,60,.05) 1px,transparent 1px);background-size:4px 4px}
+.wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 26px}
+.script{font-family:var(--f-en);color:var(--terra);font-size:30px;line-height:1;letter-spacing:.01em}
+.hand{font-family:var(--f-hand)}
+h1,h2{font-family:var(--f-ttl);font-weight:400;letter-spacing:-.005em;line-height:1.24;text-wrap:balance}
+h3{font-family:var(--f-hd);font-weight:400;letter-spacing:-.01em;line-height:1.22}
+img{max-width:100%}
+
+/* 히어로 */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:56px 0 24px;position:relative}
+.hero h1{font-size:60px;color:var(--ink)}
+.hero h1 em{font-style:normal;color:var(--terra);position:relative;display:inline-block}
+.hero h1 em::after{content:'';position:absolute;left:-2%;right:-2%;bottom:.1em;height:.28em;z-index:-1;
+ background:linear-gradient(90deg,rgba(217,164,65,.42),rgba(217,155,155,.42));border-radius:4px}
+.hero p{color:var(--ink2);font-size:17px;margin:18px 0 26px;max-width:31em}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.cta a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:800;font-size:15px;
+ padding:13px 25px;border-radius:40px;transition:.22s}
+.cta a.solid{background:var(--terra);color:#fff;box-shadow:0 8px 20px -8px rgba(196,112,63,.7)}
+.cta a.solid:hover{transform:translateY(-3px)}
+.cta a.ghost{border:1.6px solid var(--ink);color:var(--ink)}
+.cta a.ghost:hover{background:var(--ink);color:var(--cream)}
+.cta a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.shot{position:relative}
+.shot .fr{border-radius:52% 48% 46% 54%/48% 52% 48% 52%;overflow:hidden;
+ border:3px solid #fff;box-shadow:0 26px 60px -26px rgba(90,60,35,.5);background:var(--cream2);aspect-ratio:3/2}
+.shot .fr img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.shot::after{content:'';position:absolute;inset:-16px;z-index:-1;border:1.6px dashed rgba(196,112,63,.45);
+ border-radius:52% 48% 46% 54%/48% 52% 48% 52%}
+.tagfl{position:absolute;background:#fff;border:1.4px solid var(--line);border-radius:30px;
+ padding:8px 16px;font-size:13.5px;font-weight:800;box-shadow:0 8px 20px -10px rgba(90,60,35,.4);animation:bob 4.2s ease-in-out infinite}
+.tagfl.t1{top:6%;left:-6%;color:var(--sea)}
+.tagfl.t2{bottom:14%;right:-7%;color:var(--sage);animation-delay:.9s}
+.tagfl.t3{bottom:-3%;left:8%;color:var(--terra);animation-delay:1.8s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@media (prefers-reduced-motion:reduce){.tagfl{animation:none}.sig .c,.gcard,.dc{transition:none}}
+
+/* 배 한 척 — 구분 장식 */
+.shipline{position:relative;padding:8px 0 0;text-align:center}
+.shipline img{width:min(520px,80%);display:block;margin:0 auto;filter:drop-shadow(0 14px 18px rgba(63,127,151,.25))}
+.shipline::after{content:'';display:block;height:2px;margin:-6px auto 0;width:min(760px,92%);
+ background:repeating-linear-gradient(90deg,rgba(63,127,151,.5) 0 10px,transparent 10px 18px)}
+
+/* 원형 배지 */
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:22px 0 54px;text-align:center}
+.bg1{display:flex;flex-direction:column;align-items:center;gap:10px}
+.bg1 .circ{width:112px;height:112px;border-radius:50%;overflow:hidden;border:2.5px solid #fff;
+ box-shadow:0 12px 26px -14px rgba(90,60,35,.55);background:var(--cream2)}
+.bg1 .circ img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.bg1:hover .circ img{transform:scale(1.12) rotate(-4deg)}
+.bg1 .num{font-family:var(--f-num);font-weight:700;font-size:64px;line-height:.72;color:var(--terra)}
+.bg1 .num small{font-size:30px}
+.bg1 .lb{font-size:14.5px;font-weight:800;color:var(--ink2)}
+
+/* 찢어진 종이 */
+.torn{position:relative;height:38px;margin:0 -50vw;padding:0 50vw;line-height:0}
+.torn svg{width:100%;height:38px;display:block}
+
+/* 밴드 */
+.band{padding:56px 0;position:relative}
+.band.sage{background:#eef3ec}
+.band.rose{background:#faf0ee}
+.band.paper{background:var(--paper)}
+.band.sea{background:var(--sea2)}
+.shead{text-align:center;margin-bottom:34px}
+.shead .script{margin-bottom:2px}
+.shead h2{font-size:40px}
+.shead p{color:var(--ink2);font-size:15.5px;margin:10px auto 0;max-width:44em}
+
+/* 결론 3장 — 엇갈린 카드 */
+.sig{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.sig .c{background:#fff;border:1.5px solid var(--line);border-radius:22px;padding:24px 24px 20px;
+ position:relative;transition:.3s;box-shadow:0 6px 18px -12px rgba(90,60,35,.5)}
+.sig .c:nth-child(2){transform:translateY(24px)}
+.sig .c:hover{transform:translateY(-8px);box-shadow:0 24px 42px -20px rgba(90,60,35,.6);border-color:var(--terra)}
+.sig .c:nth-child(2):hover{transform:translateY(16px)}
+.sig .c.pick{border:2px solid var(--gold);background:#fffdf6}
+.sig .c .no{font-family:var(--f-en);font-size:26px;color:var(--rose);position:absolute;top:12px;right:20px}
+.sig .c.pick .no{color:var(--gold)}
+.sig .c .nm{font-family:var(--f-hd);font-size:24px;color:var(--ink);margin-bottom:4px;padding-right:40px;line-height:1.25}
+.sig .c .ship{font-size:13.5px;color:var(--ink2);font-weight:800;margin-bottom:12px}
+.sig .c .won{font-family:var(--f-num);font-weight:700;font-size:52px;line-height:.8;color:var(--sea);margin:6px 0 2px}
+.sig .c .won small{font-size:26px;color:var(--ink2)}
+.sig .c .per{font-size:13.5px;color:var(--ink2);font-weight:800;margin-bottom:12px}
+.sig .c .wh{font-size:14.6px;color:var(--ink2);line-height:1.65;padding-top:10px;border-top:1.6px dotted #e3d5be}
+.sig .c .wh li{margin-left:18px}
+.sig .c .bd{display:inline-block;margin-top:12px;font-size:12px;font-weight:800;padding:5px 13px;border-radius:20px}
+.b-pick{background:#fdf0e4;color:#a75a25;border:1px solid #eccfaf}
+.b-ok{background:#eaf1ea;color:#4f7a58;border:1px solid #c6dbc9}
+.b-hmm{background:#f8eeee;color:#a35858;border:1px solid #ebcaca}
+
+/* 코너 간판 + 카드 */
+.sec{padding:34px 0 40px;border-bottom:1.6px dashed var(--line)}
+.sec:last-of-type{border-bottom:0}
+.sechd{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.sechd .hp{width:86px;height:86px;border-radius:50%;flex:none;background-size:cover;background-position:center;
+ background-color:var(--cream2);border:2.5px solid #fff;box-shadow:0 12px 26px -16px rgba(90,60,35,.7)}
+.sechd .tx{flex:1;min-width:0}
+.sechd .en{font-family:var(--f-en);font-size:21px;color:var(--terra);line-height:1.1}
+.sechd h3{font-size:27px;margin:1px 0 3px}
+.sechd .sub{font-family:var(--f-hd);font-size:16px;color:#6b5745;line-height:1.5}
+.sechd .cnt{flex:none;font-family:var(--f-hand);font-size:21px;padding:3px 17px;border-radius:22px;background:#fff;border:1.5px solid var(--line);color:var(--ink2)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:15px}
+.gcard{background:#fff;border:1.5px solid var(--line);border-radius:19px;padding:18px 19px 15px;display:flex;flex-direction:column;
+ position:relative;transition:.25s;box-shadow:0 5px 16px -12px rgba(90,60,35,.55)}
+.gcard:hover{transform:translateY(-6px);border-color:var(--terra);box-shadow:0 22px 40px -20px rgba(90,60,35,.62)}
+.gcard .gn{font-family:var(--f-hd);font-size:18px;color:var(--ink);line-height:1.3;margin-bottom:7px}
+.gcard:hover .gn{color:var(--terra)}
+.gcard .gd{font-size:14.2px;color:var(--ink2);line-height:1.6;flex:1;margin-bottom:12px}
+.gcard .gf{display:flex;align-items:center;gap:7px;flex-wrap:wrap;border-top:1.6px dotted #e3d5be;padding-top:10px}
+.gcard .gt{font-size:12.5px;font-weight:800;color:var(--terra);white-space:nowrap}
+.pin{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.p-ton{background:#e4eff2;color:#2f6d84;border:1px solid #c3dbe3}
+.p-off{background:#f2efeb;color:#9d9084;border:1px solid #ded5c9}
+
+/* 사진 카드 (객실) */
+.photo3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pc{background:#fff;border:1.5px solid var(--line);border-radius:22px;overflow:hidden;transition:.28s;box-shadow:0 6px 18px -12px rgba(90,60,35,.5)}
+.pc:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 22px 40px -22px rgba(90,60,35,.65)}
+.pc img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.pc .in{padding:16px 18px 16px}
+.pc .nm{font-family:var(--f-hd);font-size:20px;margin-bottom:2px}
+.pc .sz{font-size:12.5px;color:var(--ink2);font-weight:800;margin-bottom:8px}
+.pc .won{font-family:var(--f-num);font-weight:700;font-size:44px;line-height:.8;color:var(--sea)}
+.pc .won small{font-size:22px;color:var(--ink2)}
+.pc .ds{font-size:13.8px;color:var(--ink2);line-height:1.6;margin-top:8px}
+.pc.best{border:2px solid var(--gold)}
+
+/* 표 */
+.tbl{overflow-x:auto;background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:6px 6px 2px;box-shadow:0 5px 16px -12px rgba(90,60,35,.5)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1.2px dotted #e3d5be;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--f-hd);font-weight:400;font-size:15px;color:var(--ink2);border-bottom:1.6px solid var(--line)}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr.hl td{background:#fff8e6}
+tr.hl td:first-child{border-left:4px solid var(--gold)}
+tr.sum td{border-top:1.6px solid var(--ink);font-weight:800;background:#fdf9f2}
+.tnote{font-size:13px;color:var(--ink2);padding:8px 14px 10px}
+
+.route{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 14px}
+.route .port{background:#fff;border:1.4px solid var(--line);border-radius:30px;padding:7px 15px;font-weight:800;font-size:14px;box-shadow:0 6px 14px -10px rgba(90,60,35,.5)}
+.route .port small{display:block;font-weight:400;color:var(--ink2);font-size:12px;line-height:1.2}
+.route .arr{color:var(--terra);font-family:var(--f-en);font-size:22px}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.note{background:#fff8e8;border:1.5px solid #f0dcae;border-radius:16px;padding:15px 20px;font-size:14.3px;color:#8a6a2e}
+.note b{color:#6f4f1c}
+.warn{background:#f8efee;border:1.5px solid #ecd2cf;border-radius:16px;padding:15px 20px;font-size:14.3px;color:#8a4a44}
+.warn b{color:#7a3a35}
+.warn ul,.note ul{margin:6px 0 0 18px}
+
+/* 재료 3열 (공식 vs 중개) */
+.ing{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.ip{border-radius:24px;padding:26px 24px 22px;border:1.5px solid var(--line);background:#fff}
+.ip.g1{background:#eff5f0;border-color:#cfe0d4}
+.ip.g2{background:#fdf4e9;border-color:#f0dcbe}
+.ip.g3{background:#e9f1f4;border-color:#c9dde4}
+.ip h4{font-family:var(--f-hd);font-weight:400;font-size:20px;margin-bottom:4px}
+.ip .cn{font-size:12.5px;color:var(--ink2);font-weight:800;margin-bottom:14px}
+.il{background:#fff;border:1px solid rgba(160,130,100,.18);border-radius:14px;padding:12px 15px;margin-bottom:9px;transition:.2s}
+.il:hover{transform:translateX(4px);box-shadow:0 8px 18px -14px rgba(90,60,35,.8)}
+.il .n{font-size:14.5px;font-weight:800;margin-bottom:2px;display:flex;justify-content:space-between;gap:8px}
+.il .n span{font-family:var(--f-num);font-size:30px;line-height:.8;color:var(--sea);font-weight:700}
+.il .u{font-size:13.2px;color:var(--ink2);line-height:1.55}
+
+/* 매일 굽는 것 → 확인·다음 */
+.daily{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.dc{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:22px 22px 18px;transition:.28s;position:relative;overflow:hidden}
+.dc:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 22px 40px -22px rgba(90,60,35,.65)}
+.dc .tm{font-family:var(--f-en);font-size:22px;color:var(--terra);margin-bottom:4px}
+.dc .nm{font-family:var(--f-hd);font-size:20px;margin-bottom:8px;word-break:keep-all}
+.dc ul{list-style:none}
+.dc li{font-size:14.3px;color:var(--ink2);line-height:1.6;padding:6px 0 6px 30px;position:relative;border-bottom:1.2px dotted #e3d5be}
+.dc li:last-child{border-bottom:0}
+.dc li::before{content:'';position:absolute;left:2px;top:9px;width:16px;height:16px;border:2px solid var(--sea);border-radius:5px;background:#fff}
+.dc ol{counter-reset:s;list-style:none}
+.dc ol li::before{content:counter(s);counter-increment:s;border:0;background:var(--terra);color:#fff;font-family:var(--f-hand);font-size:15px;text-align:center;line-height:18px;width:18px;height:18px;border-radius:50%;top:9px}
+.dc a{color:var(--sea);word-break:break-all}
+.dc a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+footer{padding:56px 0 70px;text-align:center;color:var(--ink2);font-size:14.3px;line-height:1.85}
+footer .sign{font-family:var(--f-en);font-size:34px;color:var(--terra);margin-bottom:12px}
+footer b{color:var(--ink)}
+.deco{max-width:520px;margin:26px auto 0;opacity:.85}
+
+@media (max-width:860px){
+ .hero{grid-template-columns:1fr;gap:26px;padding-top:36px}
+ .hero h1{font-size:44px}
+ .shot{max-width:480px;margin:24px auto 0}
+ .badges{grid-template-columns:repeat(2,1fr)}
+ .sig,.ing,.photo3,.two{grid-template-columns:1fr}
+ .sig .c:nth-child(2){transform:none}
+ .sig .c:nth-child(2):hover{transform:translateY(-8px)}
+ .shead h2{font-size:32px}
+ .sechd .hp{width:62px;height:62px}
+ .sechd h3{font-size:22px}
+ .wrap{padding:0 18px}
+}
+</style>
+
+<div class="wrap">
+<div class="hero">
+<div>
+<div class="script">For Mom's 70th birthday · 김현순</div>
+<h1>엄마 칠순<br><em>크루즈 여행</em> 2차안</h1>
+<p>9/18 부산 출발이 안 되면서 올해 한국 출발 대형선은 끝. 그래서 일본·대만·중국·홍콩에서 출발하는 <b>큰 배</b>를 전부 뒤져 <b>셋</b>으로 줄였습니다. 인원은 <b>3명</b> — <b>김현순</b> 어머니 · <b>정이서</b> · <b>정해민</b>, 배는 <b>MSC 벨리시마 17만 톤</b>.</p>
+<div class="cta">
+<a class="solid" href="#pick">🚢 결론 세 가지 보기</a>
+<a class="ghost" href="#official">💬 공식 파트너 vs 트립닷컴</a>
+</div>
+</div>
+<div class="shot">
+<div class="fr"><img src="{{IMG:hero_wide}}" alt="바다 위를 항해하는 MSC 벨리시마 (MSC 공식 사진)"></div>
+<div class="tagfl t1">🌊 17만 톤 · 승객 5,655명</div>
+<div class="tagfl t2">🌴 12월에도 낮 20도</div>
+<div class="tagfl t3">👩‍👩‍👧 세 식구 한 방 가능</div>
+</div>
+</div>
+
+<div class="badges">
+<div class="bg1"><div class="circ"><img src="{{IMG:galleria_sq}}" alt="갤러리아 벨리시마 LED 돔 프라머네이드"></div><div class="num">96<small>m</small></div><div class="lb">LED 돔 실내 산책로</div></div>
+<div class="bg1"><div class="circ"><img src="{{IMG:buffet_sq}}" alt="마켓플레이스 뷔페"></div><div class="num">20<small>시간</small></div><div class="lb">하루 뷔페 운영 · 100종 이상</div></div>
+<div class="bg1"><div class="circ"><img src="{{IMG:theatre_sq}}" alt="런던 극장"></div><div class="num">10<small>개</small></div><div class="lb">레스토랑 · 바는 20개</div></div>
+<div class="bg1"><div class="circ"><img src="{{IMG:pool_sq}}" alt="아트모스피어 풀"></div><div class="num">4<small>박 5일</small></div><div class="lb">매일 기항 · 해상일 0일</div></div>
+</div>
+</div>
+
+<div class="torn"><svg viewBox="0 0 1200 38" preserveAspectRatio="none"><path fill="#eef3ec" d="M0,20 C60,6 110,32 170,18 C230,4 280,30 340,17 C400,4 450,31 510,19 C570,7 620,33 680,20 C740,7 790,32 850,18 C910,4 960,30 1020,17 C1080,4 1140,28 1200,15 L1200,38 L0,38 Z"/></svg></div>
+
+<!-- ───────── 결론 ───────── -->
+<div class="band sage" id="pick"><div class="wrap">
+<div class="shead"><div class="script">Our Pick</div><h2>결론 — 셋 중 하나</h2>
+<p>세 안 모두 <b>3명 · 항공 포함 총액</b>입니다. A안은 크루즈(크루즈TMK·트립닷컴)와 항공(인천↔나하) 둘 다 9/12 실제 조회값, B·C안 항공은 추정 범위. 결제 직전 다시 봅니다.</p></div>
+<div class="sig">
+<div class="c pick">
+<div class="no">A</div>
+<div class="nm">12/14 나하(오키나와) 출발<br>4박 5일</div>
+<div class="ship">MSC 벨리시마 · 17만 톤 · 매일 기항</div>
+<div class="won">355<small>만</small></div>
+<div class="per">내측 3인 1실 + 항공 · 1인 118만 (전날 1박 안 370만)</div>
+<div class="won">416<small>만</small></div>
+<div class="per">발코니 3인 1실 + 항공 · 1인 139만 (전날 1박 안 431만)</div>
+<ul class="wh"><li>인천→나하 직항 하루 7편, 1인 왕복 42만</li><li>세 식구 한 방 + 발코니 가능</li><li>일본 무비자 · 공항→항구 20분</li></ul>
+<span class="bd b-pick">💛 추천</span></div>
+<div class="c">
+<div class="no">B</div>
+<div class="nm">12/8 지룽(타이베이) 출발<br>4박 5일</div>
+<div class="ship">같은 배 · 같은 항로를 대만에서 탄다</div>
+<div class="won">310~340<small>만</small></div>
+<div class="per">내측 2인실 + 1인실 · 1인 103~113만</div>
+<ul class="wh"><li>A보다 10~30만 절약</li><li>비행 2.5시간 + 항구까지 1시간</li><li>발코니 매진 · 3인실 없음</li></ul>
+<span class="bd b-ok">값이 먼저면</span></div>
+<div class="c">
+<div class="no">C</div>
+<div class="nm">10/7 · 10/16 상하이 출발<br>4박 5일</div>
+<div class="ship">스펙트럼 오브 더 씨즈 · 16.9만 톤</div>
+<div class="won">220~300<small>만</small></div>
+<div class="per">내측 · 1인 74~98만 · 요금 구성 확인 필요</div>
+<ul class="wh"><li>가장 저렴</li><li>기항지가 <b>부산 하나뿐</b></li><li>손님·방송 대부분 중국인</li></ul>
+<span class="bd b-hmm">싼 이유가 있다</span></div>
+</div>
+</div></div>
+
+<div class="torn"><svg viewBox="0 0 1200 38" preserveAspectRatio="none"><path fill="#fbf6ee" d="M0,20 C60,6 110,32 170,18 C230,4 280,30 340,17 C400,4 450,31 510,19 C570,7 620,33 680,20 C740,7 790,32 850,18 C910,4 960,30 1020,17 C1080,4 1140,28 1200,15 L1200,38 L0,38 Z"/></svg></div>
+
+<!-- ───────── 공식 vs 중개 ───────── -->
+<div class="wrap" id="official" style="padding-top:44px">
+<div class="shead"><div class="script">Official or not?</div><h2>공식 사이트에서 사야 하는 거 아니야?</h2>
+<p>확인해 봤습니다. <b>MSC 한국 공식 사이트는 온라인 판매를 안 합니다.</b> "예약·문의는 공식 파트너 여행사로" 라고 적혀 있고, 글로벌 사이트(msccruises.com)는 "거주 국가 사이트로 가라"고 안내합니다. 한국 사람에게 「공식 가격」은 <b>공식 파트너 여행사 10곳의 가격</b>이고, 유튜브 <b>크달</b>도 그 중 하나인 <b>크루즈TMK 예약창</b>으로 연결됩니다. 그 예약창에서 나하 12/14 · 성인 3명을 넣고 직접 뽑았습니다.</p></div>
+<div class="ing">
+<div class="ip g2"><h4>한국 · 크루즈TMK (크달 링크)</h4><div class="cn">MSC 코리아 공식 파트너 · 9/12 실조회 · 3인 1실 총액 · 세금 포함 · 팁 별도</div>
+<div class="il"><div class="n">디럭스 인테리어 IR1 <span>191<small style="font-size:16px">만</small></span></div><div class="u">$1,427 (1인 $475.67) · 5~10층 · 14.95㎡</div></div>
+<div class="il"><div class="n">디럭스 발코니 파셜뷰 BP <span>238<small style="font-size:16px">만</small></span></div><div class="u">$1,777 · 8·14층 · 시야 일부 가림</div></div>
+<div class="il"><div class="n">디럭스 발코니 BR1 <span>252<small style="font-size:16px">만</small></span></div><div class="u">$1,877 · 8~10층 · 17㎡ + 발코니 4㎡</div></div>
+<div class="u" style="font-size:12.5px;color:#a8967f;margin-top:6px">판타스티카 요금제 — 선실 선택 · 일정 변경 1회 무료 · 룸서비스 무료. 한국어 응대 1544-3441</div></div>
+<div class="ip g3"><h4>트립닷컴 · 9/12 실조회</h4><div class="cn">같은 배 · 같은 날 · 3인 1실 총액 · 항만세 포함 · 팁 별도</div>
+<div class="il"><div class="n">럭셔리 인사이드 <span>192<small style="font-size:16px">만</small></span></div><div class="u">640,378원 × 3 = 1,921,134원</div></div>
+<div class="il"><div class="n">럭셔리 발코니 (일부 가림) <span>239<small style="font-size:16px">만</small></span></div><div class="u">797,781원 × 3 = 2,393,343원</div></div>
+<div class="il"><div class="n">럭셔리 발코니 <span>253<small style="font-size:16px">만</small></span></div><div class="u">842,177원 × 3 = 2,526,531원</div></div>
+<div class="u" style="font-size:12.5px;color:#a8967f;margin-top:6px">MSC와 트립닷컴(씨트립)은 아시아 판매 제휴. 예약금 없이 전액 결제 · 고객센터 1666-0060</div></div>
+<div class="ip g1"><h4>일본 · MSC 정규 특약점</h4><div class="cn">IMA (MSCクルーズ正規特約店) · 2인 1실 1인 · 12/2~12/22 동일</div>
+<div class="il"><div class="n">인사이드 ¥65,980 <span>59<small style="font-size:16px">만</small></span></div><div class="u">항만세 ¥160 · 팁 $18/박 · 출국세 ¥3,000 별도</div></div>
+<div class="il"><div class="n">발코니 ¥99,800 <span>90<small style="font-size:16px">만</small></span></div><div class="u">전망 일부 가림은 ¥89,800. 3·4번째 승객 50~70%, 1인실 200%</div></div>
+<div class="u" style="font-size:12.5px;color:#a8967f;margin-top:6px">일본 거주자 대상이라 한국에서 직접 사긴 어려움. 정가 기준선으로만 씁니다</div></div>
+</div>
+<div class="note" style="margin-top:20px"><b>정리</b> — <b>같은 배·같은 날·같은 방이면 한국 공식 파트너(크루즈TMK)와 트립닷컴 값이 1만 원 안팎으로 같습니다.</b> 둘 다 MSC 요금표를 그대로 파는 겁니다. 1차안에 적었던 「한국 여행사 95만」은 다른 시즌·다른 상품 값이었고, 이번에 같은 조건으로 다시 뽑으니 차이가 없었습니다. 그러면 남는 건 <b>누가 챙겨주느냐</b>입니다 — 한국어로 전화가 되고 일정 변경 1회가 무료인 <b>크루즈TMK</b>가 우리 쪽에 맞습니다. 크달 링크로 들어가면 같은 값에 크달 구독자 혜택(일부 상품 선상 크레딧)이 붙을 수 있으니, 결제 전에 크달 문의창에서 이 항차도 되는지 물어봅니다.</div>
+</div>
+
+<div class="wrap"><div class="shipline"><img src="{{IMG:mini}}" alt="MSC 벨리시마 측면도 (MSC 공식)"></div></div>
+
+<!-- ───────── A안 상세 ───────── -->
+<div class="band paper" id="a"><div class="wrap">
+<div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:pool}})"></div><div class="tx">
+<div class="en">Plan A · Naha</div><h3>🌺 A안 — 나하(오키나와) 출발 상세</h3><div class="sub">MSC 벨리시마 · 12월 14일(월) 19:00 출항 · 18일(금) 07:00 도착</div>
+</div><div class="cnt">4박 5일</div></div>
+
+<div class="route">
+<span class="port">나하<small>19:00 출항 · 승선 마감 17:00</small></span><span class="arr">→</span>
+<span class="port">이시가키<small>09:00 ~ 19:00</small></span><span class="arr">→</span>
+<span class="port">지룽 · 타이베이<small>07:00 ~ 18:00</small></span><span class="arr">→</span>
+<span class="port">미야코지마<small>08:00 ~ 18:00</small></span><span class="arr">→</span>
+<span class="port">나하<small>07:00 도착</small></span>
+</div>
+<p style="font-size:14px;color:var(--ink2);margin-bottom:22px">승선 마감이 오후 5시라 <b>당일 오전 인천 출발 비행기</b>로 됩니다. 돌아올 땐 5일차 아침 도착 → 오후 비행기. 해상일이 없어 뱃멀미 걱정도 덜합니다.</p>
+
+<div class="two">
+<div>
+<h3 style="font-size:20px;margin-bottom:10px">12월 출항일별 — 내측 2인 1실, 1인 요금</h3>
+<div class="tbl"><table>
+<thead><tr><th>출항일</th><th class="num">1인 (원)</th><th>메모</th></tr></thead>
+<tbody>
+<tr><td>12/2 (수)</td><td class="num">805,853</td><td></td></tr>
+<tr><td>12/6 (일)</td><td class="num">610,780</td><td>두 번째 후보</td></tr>
+<tr><td>12/10 (목)</td><td class="num">738,587</td><td></td></tr>
+<tr class="hl"><td>12/14 (월)</td><td class="num">597,327</td><td>12월 최저</td></tr>
+<tr><td>12/18 (금)</td><td class="num">725,133</td><td></td></tr>
+<tr><td>12/22 (화)</td><td class="num">610,780</td><td>연말 항공 비쌈</td></tr>
+<tr><td>12/30 (수)</td><td class="num">2,608,595</td><td>연말 특수 · 제외</td></tr>
+<tr><td>1/3 · 1/7</td><td class="num">684,773 · 610,780</td><td>해 넘김</td></tr>
+</tbody></table></div>
+</div>
+<div>
+<h3 style="font-size:20px;margin-bottom:10px">12/14 출항 · 3인 총액</h3>
+<div class="tbl"><table>
+<thead><tr><th>항목</th><th class="num">내측 3인 1실</th><th class="num">발코니 3인 1실</th></tr></thead>
+<tbody>
+<tr><td>크루즈 3인 1실 (세금 포함 · 크루즈TMK 실조회)</td><td class="num">191만</td><td class="num">252만</td></tr>
+<tr><td>선상팁 $18 × 4박 × 3</td><td class="num">29만</td><td class="num">29만</td></tr>
+<tr><td>일본 출국세 3,000엔 × 3</td><td class="num">8만</td><td class="num">8만</td></tr>
+<tr><td>항공 인천↔나하 이스타 왕복 (1인 423,300 · 실조회)</td><td class="num">127만</td><td class="num">127만</td></tr>
+<tr class="sum"><td>합계 — 당일(12/14) 출발</td><td class="num">355만</td><td class="num">416만</td></tr>
+<tr class="sum"><td>1인</td><td class="num">118만</td><td class="num">139만</td></tr>
+<tr><td>전날(12/13) 출발 시 — 항공 122만 + 호텔 JAL시티 14.6만 + 택시·저녁 6만</td><td class="num">+15만</td><td class="num">+15만</td></tr>
+<tr class="sum"><td>합계 — 전날 출발 + 나하 1박</td><td class="num">370만</td><td class="num">431만</td></tr>
+<tr class="sum"><td>1인</td><td class="num">123만</td><td class="num">144만</td></tr>
+</tbody></table>
+<div class="tnote">위 355/416만은 <b>당일 출발 기준</b>이고, 전날 나하 1박 안을 택하면 <b>370/431만</b>입니다(호텔 라젠트면 -4만). 발코니를 「시야 일부 가림 BP」로 하면 각각 -14만.</div></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:skylounge}})"></div><div class="tx">
+<div class="en">Flights</div><h3>✈ 한국 → 나하 비행기 전부 (12/14 가는 편 · 12/18 오는 편)</h3><div class="sub">트립닷컴 9/12 21:15 실조회 · 성인 3명 · 1인 편도 요금 · 전부 위탁 수하물 포함 · 직항만</div>
+</div><div class="cnt">직항 3 공항</div></div>
+<div class="two">
+<div>
+<h3 style="font-size:20px;margin-bottom:10px">12/14(월) 인천 → 나하 · 승선 마감 17:00</h3>
+<div class="tbl"><table>
+<thead><tr><th>항공사</th><th>출발 → 도착</th><th class="num">1인</th><th>판정</th></tr></thead>
+<tbody>
+<tr><td>대한항공</td><td>08:30 → 11:00</td><td class="num">314,000</td><td>여유 6시간 · 풀서비스</td></tr>
+<tr><td>진에어</td><td>09:20 → 11:40</td><td class="num">245,800</td><td>여유 5시간</td></tr>
+<tr class="hl"><td>진에어</td><td>10:10 → 12:35</td><td class="num">210,700</td><td>여유 4시간 · 추천</td></tr>
+<tr class="hl"><td>이스타항공</td><td>11:25 → 14:00</td><td class="num">205,100</td><td>여유 3시간 · 최저 안전선</td></tr>
+<tr><td>트리니티항공</td><td>11:50 → 14:25</td><td class="num">205,300</td><td>여유 2시간 30분</td></tr>
+<tr><td>제주항공</td><td>13:20 → 15:50</td><td class="num">186,300</td><td>제일 싸지만 여유 70분 — 연착 시 배 놓침</td></tr>
+<tr><td>아시아나 · 대한항공(공동)</td><td>14:50 → 17:25</td><td class="num">315,300~</td><td>마감 후 도착 · 불가</td></tr>
+</tbody></table>
+<div class="tnote">김포·대구·청주 출발은 직항 없음(도쿄·후쿠오카 경유, 저녁 도착). 하루 전 12/13(일) 출발은 1인 168,800~ + 나하 호텔 1박.</div></div>
+</div>
+<div>
+<h3 style="font-size:20px;margin-bottom:10px">12/18(금) 나하 → 인천 · 배 07:00 도착</h3>
+<div class="tbl"><table>
+<thead><tr><th>항공사</th><th>출발 → 도착</th><th class="num">1인</th><th>판정</th></tr></thead>
+<tbody>
+<tr><td>대한항공 / 아시아나(공동)</td><td>12:00 → 14:20</td><td class="num">358,000~374,900</td><td>풀서비스 · 9석 미만</td></tr>
+<tr><td>진에어</td><td>12:40 → 14:55</td><td class="num">253,700</td><td>하선 후 바로 공항</td></tr>
+<tr><td>진에어</td><td>13:35 → 15:55</td><td class="num">253,700</td><td></td></tr>
+<tr class="hl"><td>이스타항공</td><td>15:00 → 17:50</td><td class="num">218,200</td><td>최저 · 나하 시내 점심 가능 · 추천</td></tr>
+<tr><td>트리니티항공</td><td>15:25 → 17:55</td><td class="num">255,670</td><td></td></tr>
+<tr><td>제주항공</td><td>16:50 → 19:15</td><td class="num">227,900</td><td></td></tr>
+<tr><td>이스타항공</td><td>18:35 → 20:55</td><td class="num">230,300</td><td>9석 미만</td></tr>
+</tbody></table>
+<div class="tnote">12/19(토) 귀국은 1인 185,200~. 12/15·16 출발이 더 싸지만(149,100~) 배 일정과 안 맞습니다.</div></div>
+</div>
+</div>
+<div class="two" style="margin-top:18px">
+<div class="tbl"><table>
+<thead><tr><th>조합 (인천 왕복)</th><th class="num">1인</th><th class="num">3인</th></tr></thead>
+<tbody>
+<tr class="hl"><td>이스타 11:25 + 이스타 15:00 — 최저 안전선</td><td class="num">423,300</td><td class="num">1,269,900</td></tr>
+<tr class="hl"><td>진에어 10:10 + 이스타 15:00 — 추천 (여유 4시간)</td><td class="num">428,900</td><td class="num">1,286,700</td></tr>
+<tr><td>진에어 10:10 + 진에어 12:40 — 같은 항공사</td><td class="num">464,400</td><td class="num">1,393,200</td></tr>
+<tr><td>대한항공 08:30 + 대한항공 12:00 — 풀서비스</td><td class="num">688,900</td><td class="num">2,066,700</td></tr>
+<tr><td>제주 13:20 + 이스타 15:00 — 트립닷컴 최저 왕복</td><td class="num">402,600</td><td class="num">1,207,800</td></tr>
+</tbody></table>
+<div class="tnote">왕복 검색 최저 402,600원은 제주항공 13:20 편입니다. 2만 원 아끼자고 배를 놓칠 위험을 지는 건 아니라서 표에서 뺐습니다.</div></div>
+<div>
+<div class="tbl"><table>
+<thead><tr><th>부산 김해 출발 (왕복 · 12/14~18)</th><th class="num">1인</th><th class="num">3인</th></tr></thead>
+<tbody>
+<tr class="hl"><td>진에어 07:55 → 10:05 · 왕복 최저</td><td class="num">404,200</td><td class="num">1,212,600</td></tr>
+<tr><td>이스타 08:30 → 10:30 · 왕복</td><td class="num">404,500</td><td class="num">1,213,500</td></tr>
+<tr><td>대한항공 · 아시아나 (인천 경유, 17:25 도착)</td><td class="num">595,500~</td><td class="num">마감 후 · 불가</td></tr>
+</tbody></table>
+<div class="tnote">부산 직항은 하루 2편(LCC)뿐이지만 아침 편이라 여유가 7시간. 부산에서 가까우면 인천보다 낫습니다. 12/15~19로 옮기면 335,900원.</div></div>
+<div class="note" style="margin-top:12px"><b>항공 결론</b> — 인천이면 <b>진에어 10:10 가고 이스타 15:00 오는 조합, 1인 428,900원</b>. 3인 129만. 부산이면 진에어 아침 편 왕복 404,200원. 크루즈 확정한 날 같이 잡습니다 — 출발 40일 전이 제일 싸다는 통계라 <b>11월 초 전에</b>.</div>
+</div>
+</div>
+</div>
+
+<!--HOTEL_SEC--><div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:balcony}})"></div><div class="tx">
+<div class="en">Cabins</div><h3>🛏 객실 — 세 식구 한 방, 3인 요금</h3><div class="sub">트립닷컴 「객실당 3명」 실조회 · 사진은 MSC 공식 객실 사진</div>
+</div><div class="cnt">3인 1실</div></div>
+<div class="photo3">
+<div class="pc"><img src="{{IMG:interior}}" alt="MSC 벨리시마 내측 객실 (MSC 공식)"><div class="in">
+<div class="nm">럭셔리 인사이드</div><div class="sz">15㎡ · 데크 5, 8~14 · 창 없음</div>
+<div class="won">640,378<small>원 × 3</small></div>
+<div class="ds">3인 합 <b>1,921,134원</b>. 방에선 잠만 자고 배 안에서 놀 거면 이걸로 충분. 매일 기항이라 낮엔 방에 있을 일이 없습니다.</div></div></div>
+<div class="pc"><img src="{{IMG:oceanview}}" alt="MSC 벨리시마 오션뷰 객실 (MSC 공식)"><div class="in">
+<div class="nm">오션뷰</div><div class="sz">12~16㎡ · 데크 5, 8 · 창문 있음</div>
+<div class="won">765,493<small>원 (2인)</small></div>
+<div class="ds">3인 요금은 트립닷컴에 안 떠서 미확인. 발코니와 값 차이가 거의 없어 <b>굳이 고를 이유가 적은</b> 등급.</div></div></div>
+<div class="pc best"><img src="{{IMG:balcony}}" alt="MSC 벨리시마 발코니 객실 (MSC 공식)"><div class="in">
+<div class="nm">럭셔리 발코니 💛</div><div class="sz">17㎡ + 발코니 4㎡ · 데크 8~10</div>
+<div class="won">842,177<small>원 × 3</small></div>
+<div class="ds">3인 합 <b>2,526,531원</b>. 내측보다 3인 합 60만 더. 엄마 침대 + 아침 바다 + 세 식구 한 방 — <b>칠순 선물이면 이게 값을 합니다.</b> 전망 일부 가림은 797,781원.</div></div></div>
+</div>
+<div class="note" style="margin-top:18px"><b>객실 판단</b> — 3인 1실이 되는 상품이면 그게 답입니다(엄마 + 작은언니 침대, 나는 소파베드). 1차안의 "4인 1실 부적합" 판단은 3명이면 완화됩니다. 화장실 1개 · 4박이면 감당 가능.</div>
+</div>
+
+<div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:galleria}})"></div><div class="tx">
+<div class="en">On board</div><h3>🍽 배 안에서 — 요금에 포함된 것</h3><div class="sub">MSC 공식 사진 · 정찬 레스토랑 · 뷔페 · 극장 쇼 · 수영장 · 헬스장은 무료</div>
+</div><div class="cnt">포함</div></div>
+<div class="photo3">
+<div class="pc"><img src="{{IMG:lighthouse}}" alt="라이트하우스 정찬 레스토랑 (MSC 공식)"><div class="in"><div class="nm">정찬 레스토랑</div><div class="ds">매일 저녁 코스 요리, 메뉴가 날마다 바뀜. 갈라 디너 1회. 좌석·시간 배정 → 세 식구 한 테이블.</div></div></div>
+<div class="pc"><img src="{{IMG:buffet}}" alt="마켓플레이스 뷔페 (MSC 공식)"><div class="in"><div class="nm">마켓플레이스 뷔페</div><div class="ds">하루 20시간 · 100종 이상. 아시아 노선이라 중식·일식 코너가 큼. 아침은 여기가 편합니다.</div></div></div>
+<div class="pc"><img src="{{IMG:theatre}}" alt="런던 극장 (MSC 공식)"><div class="in"><div class="nm">런던 극장 · 쇼</div><div class="ds">매일 밤 아크로바틱·뮤지컬 쇼 무료. 카루셀 라운지의 서커스 쇼만 유료(칵테일 패키지).</div></div></div>
+</div>
+<div class="warn" style="margin-top:18px"><b>요금에 안 들어가는 것</b> — 주류·탄산 음료, 유료 레스토랑(스테이크·스시·데판야키), 인터넷, 기항지 관광, 스파, 선상팁 $18/박, 일본 출국세 3,000엔. 기항지는 셋 다 항구에서 시내가 가까워 <b>택시나 걸어서</b> 다녀도 됩니다.</div>
+</div>
+</div></div>
+
+<div class="torn"><svg viewBox="0 0 1200 38" preserveAspectRatio="none"><path fill="#fbf6ee" d="M0,20 C60,6 110,32 170,18 C230,4 280,30 340,17 C400,4 450,31 510,19 C570,7 620,33 680,20 C740,7 790,32 850,18 C910,4 960,30 1020,17 C1080,4 1140,28 1200,15 L1200,38 L0,38 Z"/></svg></div>
+
+<!-- ───────── B · C ───────── -->
+<div class="wrap" style="padding-top:30px">
+<div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:skylounge}})"></div><div class="tx">
+<div class="en">Plan B · Keelung</div><h3>🏮 B안 — 같은 배, 타이베이에서 타기</h3><div class="sub">지룽 12/8(화) 18:00 출항 · 12(토) 07:00 도착 · 미야코지마 → 나하 → 이시가키</div>
+</div><div class="cnt">-10~30만</div></div>
+<div class="two">
+<div class="tbl"><table>
+<thead><tr><th>출항일</th><th class="num">내측 2인 1실, 1인 (원)</th></tr></thead>
+<tbody>
+<tr><td>11/25</td><td class="num">765,493</td></tr>
+<tr><td>12/4</td><td class="num">684,773</td></tr>
+<tr class="hl"><td>12/8 (화)</td><td class="num">590,600</td></tr>
+<tr><td>12/12 · 12/16</td><td class="num">617,507</td></tr>
+<tr><td>12/20</td><td class="num">738,587</td></tr>
+<tr><td>12/24 · 12/28</td><td class="num">846,213 · 778,947</td></tr>
+</tbody></table></div>
+<div>
+<div class="tbl"><table>
+<tbody>
+<tr><td>내측 2인실 590,600 × 2 + 내측 1인실 778,947</td><td class="num">196만</td></tr>
+<tr><td>선상팁 + 일본 출국세</td><td class="num">37만</td></tr>
+<tr><td>항공 인천↔타이베이 (1인 25~35만)</td><td class="num">75~105만</td></tr>
+<tr class="sum"><td>합계 / 1인</td><td class="num">308~338만 / 103~113만</td></tr>
+</tbody></table>
+<div class="tnote">1인실 추가요금이 <b>1.3배</b>(2배 아님)라 3명이어도 4명 값까진 안 갑니다. 발코니는 매진, 내측은 3인 옵션 없음.</div></div>
+<div class="note" style="margin-top:12px">A안 내측과 10~30만 차이. 대신 비행 2.5시간 + 타오위안공항→지룽항 1시간, 엄마 방이 따로(1인실). <b>값보다 편함이면 A, 20만이 아쉬우면 B.</b></div>
+</div>
+</div>
+</div>
+
+<div class="sec">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:aquapark}})"></div><div class="tx">
+<div class="en">Plan C · Shanghai</div><h3>🥟 C안 — 스펙트럼 오브 더 씨즈, 상하이 출발</h3><div class="sub">로얄캐리비안 16.9만 톤 · 중·일 갈등으로 2026년 5월~2027년 4월 상하이 출발편 일본 기항이 전부 한국으로 교체</div>
+</div><div class="cnt">최저가</div></div>
+<div class="tbl"><table>
+<thead><tr><th>출항일</th><th>항로</th><th class="num">인터파크/NOL 1인</th><th class="num">해외 사이트 1인</th></tr></thead>
+<tbody>
+<tr class="hl"><td>10/7 (수) 4박</td><td>상하이 – 해상 – <b>부산</b> – 해상 – 상하이</td><td class="num">439,894원</td><td class="num">$673</td></tr>
+<tr><td>10/11 (토) 5박</td><td>상하이 – 제주 – 부산 – 상하이</td><td class="num">—</td><td class="num">$737~1,075</td></tr>
+<tr class="hl"><td>10/16 (금) 4박</td><td>상하이 – 해상 – <b>부산</b> – 해상 – 상하이</td><td class="num">464,820원</td><td class="num">—</td></tr>
+<tr><td>10/20 (화) 4박</td><td>상하이 – 오키나와 – 상하이 (변경 없음)</td><td class="num">—</td><td class="num">$1,058</td></tr>
+<tr><td>11/1 (일) 5박</td><td>상하이 – 제주 – 부산 – <b>홍콩</b> 편도</td><td class="num">—</td><td class="num">$504~1,067</td></tr>
+</tbody></table>
+<div class="tnote"><b>3인 총액 (10/7 내측)</b> — 크루즈 132~176만(3인 1실 가능 여부 미확인) + 팁 29만 + 항공 인천↔상하이 60~90만 = <b>약 220~295만 (1인 74~98만)</b></div></div>
+<div class="warn" style="margin-top:14px"><b>감안할 것</b>
+<ul><li>기항지가 <b>부산 하나</b>. 배·식사·쇼가 목적이면 괜찮지만 "어디 다녀왔다"가 없습니다</li>
+<li>중국 내수 배 — 방송·쇼·손님 대부분 중국인. 리뷰: "영어·중국어 위주, 직원이 필요한 사람은 찾아줌"</li>
+<li>한국인 중국 무비자 2026-12-31까지 → 비자 문제 없음</li>
+<li>인터파크 44만이 내측·항만세 포함인지 전화 확인 필요 (NOL 1644-1346) · 10/7은 오늘부터 25일</li></ul></div>
+</div>
+</div>
+
+<div class="torn"><svg viewBox="0 0 1200 38" preserveAspectRatio="none"><path fill="#faf0ee" d="M0,20 C60,6 110,32 170,18 C230,4 280,30 340,17 C400,4 450,31 510,19 C570,7 620,33 680,20 C740,7 790,32 850,18 C910,4 960,30 1020,17 C1080,4 1140,28 1200,15 L1200,38 L0,38 Z"/></svg></div>
+
+<!-- ───────── 뺀 배 ───────── -->
+<div class="band rose"><div class="wrap">
+<div class="shead"><div class="script">Not this time</div><h2>뒤져보고 뒤로 미룬 배 9척</h2>
+<p>조건은 셋 — 올해 안 · 가까운 나라 출발 · 배가 클 것(10만 톤 이상). 하나라도 어긋나거나 값이 A·B를 넘으면 뺐습니다.</p></div>
+<div class="grid">
+<div class="gcard"><div class="gn">스펙트럼 · 홍콩 출발</div><div class="gd">11/16 다낭 4박 $678 · 12/13 오키나와 5박 $879 · 12/6 오키나와+타이베이 5박 $1,196. 홍콩 항공 35~40만 얹으면 1인 130~200만</div><div class="gf"><span class="pin p-ton">16.9만 톤</span><span class="gt">A·B보다 비쌈</span></div></div>
+<div class="gcard"><div class="gn">벨리시마 · 도쿄 → 지룽 편도</div><div class="gd">11/21 4박 577,147원. 값은 B와 같은데 인천→도쿄, 타이베이→인천 항공을 따로 사야 함</div><div class="gf"><span class="pin p-ton">17만 톤</span><span class="gt">번거로움만 늘어남</span></div></div>
+<div class="gcard"><div class="gn">내비게이터 오브 더 씨즈 · 싱가포르</div><div class="gd">10/29부터 4박 $771. 싱가포르 항공 50~60만 → 1인 160만 이상</div><div class="gf"><span class="pin p-ton">13.9만 톤</span><span class="gt">항공이 비쌈</span></div></div>
+<div class="gcard"><div class="gn">디즈니 어드벤처 · 싱가포르</div><div class="gd">아시아 최대 20.8만 톤이지만 아이 중심 · 고가</div><div class="gf"><span class="pin p-ton">20.8만 톤</span><span class="gt">고가</span></div></div>
+<div class="gcard"><div class="gn">다이아몬드 프린세스 · 도쿄</div><div class="gd">10~11월 전부 10~14박짜리. 1인 200만 이상</div><div class="gf"><span class="pin p-ton">11.5만 톤</span><span class="gt">너무 길다</span></div></div>
+<div class="gcard"><div class="gn">코스타 세레나</div><div class="gd">10/18 도쿄 출발 후 호주로 떠남 — 올해 아시아 일정 없음</div><div class="gf"><span class="pin p-ton">11.4만 톤</span><span class="gt">아시아를 떠남</span></div></div>
+<div class="gcard"><div class="gn">노르위전 제이드 · 도쿄 → 인천</div><div class="gd">10/7 출발 11박, 인천 도착이 매력이지만 너무 길고 중형</div><div class="gf"><span class="pin p-off">9.3만 톤</span><span class="gt">11박 · 중형</span></div></div>
+<div class="gcard"><div class="gn">아도라 매직시티 · 상하이</div><div class="gd">중국 내수 전용, 한국에서 살 창구가 사실상 없음</div><div class="gf"><span class="pin p-ton">13.5만 톤</span><span class="gt">판매 창구 없음</span></div></div>
+<div class="gcard"><div class="gn">이스턴비너스 · 부산/포항</div><div class="gd">한국 출발이라 좋지만 720명짜리 — 벨리시마의 1/6. 3박 104~119만으로 오히려 비쌈</div><div class="gf"><span class="pin p-off">2.6만 톤</span><span class="gt">크기 조건 미달</span></div></div>
+</div>
+</div></div>
+
+<div class="torn"><svg viewBox="0 0 1200 38" preserveAspectRatio="none"><path fill="#fbf6ee" d="M0,20 C60,6 110,32 170,18 C230,4 280,30 340,17 C400,4 450,31 510,19 C570,7 620,33 680,20 C740,7 790,32 850,18 C910,4 960,30 1020,17 C1080,4 1140,28 1200,15 L1200,38 L0,38 Z"/></svg></div>
+
+<!-- ───────── 확인 · 다음 ───────── -->
+<div class="wrap" style="padding-top:44px" id="next">
+<div class="shead"><div class="script">Before we book</div><h2>확인할 것 · 다음 액션</h2></div>
+<div class="daily">
+<div class="dc"><div class="tm">Today</div><div class="nm">✅ 바로 확인</div>
+<ul>
+<li><b>여권 유효기간 3명</b> (김현순 · 정이서 · 정해민) — 2026-12-18 기준 6개월 이상 (2027-06-18 이후 만료)</li>
+<li>해민 언니 휴가 — 12/14(월)~12/18(금). 전날 출발 안이면 12/13(일)부터</li>
+<li>해외 결제 카드 — 트립닷컴은 예약금 없이 <b>전액 결제</b></li>
+<li>엄마 12월 일정 (병원 등)</li>
+</ul></div>
+<div class="dc"><div class="tm">Still open</div><div class="nm">🔍 아직 못 본 것</div>
+<ol>
+<li>나하 12/14 3인 발코니 잔여 — 9/12엔 3종 떴음. 결제 직전 재확인</li>
+<li>전날(12/13) 도착 + 나하 1박 안으로 갈지 엄마께 여쭤보기 — 「🏨 전날 도착 안」 참고, 3인 +9~14만</li>
+<li>트립닷컴 「5% 할인」 쿠폰 · 「기간 한정 무료 취소」 기한</li>
+<li>크달 문의창에 "나하 12/14 벨리시마 3인, 구독자 혜택 되나요" 한 줄 — 되면 크달 링크로 결제</li>
+</ol></div>
+<div class="dc"><div class="tm">Next</div><div class="nm">🚢 다음 액션</div>
+<ol>
+<li><b>A(나하 · 편함) / B(타이베이 · 절약) / C(상하이 · 최저가)</b> 중 결정</li>
+<li>A 확정 → 크루즈TMK(크달 링크) 나하 12/14 성인 3 · 디럭스 발코니 BR1($1,877) 또는 인테리어 IR1($1,427) 결제 → 같은 날 진에어 10:10 / 이스타 15:00 항공 결제 (3인 1,286,700원)</li>
+<li>12/14 발코니 매진이면 12/6 또는 12/22 (610,780)로</li>
+<li>예약 완료 후 선상팁 · 출국세 · 기항지 예산 확정</li>
+</ol>
+<div style="margin-top:12px;font-size:13px;color:var(--ink2);line-height:1.7">
+나하 출발 — <a href="https://kr.trip.com/cruises/line-73172-naha-hawaii-4night-msc-bellissima-msc/?departure=2026-12-14&locale=ko-KR">kr.trip.com … line-73172 (12/14)</a><br>
+지룽 출발 — <a href="https://kr.trip.com/cruises/line-75097-keelung-hawaii-4night-msc-bellissima-msc/?departure=2026-12-08&locale=ko-KR">kr.trip.com … line-75097 (12/8)</a><br>
+MSC 코리아 공식 파트너 목록 — <a href="https://www.msccruises.com/int/korea/contact-us">msccruises.com/int/korea/contact-us</a><br>
+크달 — <a href="https://cdal.app/products">cdal.app/products</a> (예약창은 크루즈TMK) · 트립닷컴 1666-0060 · NOL 1644-1346 · 크루즈TMK 1544-3441</div></div>
+</div>
+</div>
+
+<footer><div class="wrap">
+<div class="sign">Bon voyage, Mom</div>
+<b>조사 2026-09-12</b> · 환율 1달러 1,340원 · 100엔 900원 · 요금은 전부 실시간으로 바뀝니다<br>
+사진은 MSC 크루즈 공식 사이트(msccruises.com)의 벨리시마 사진입니다 — 가족 계획용으로만 씁니다
+<div class="deco"><img src="{{IMG:mini}}" alt=""></div>
+</div></footer>

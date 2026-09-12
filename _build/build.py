@@ -1,0 +1,466 @@
+# -*- coding: utf-8 -*-
+"""엄마칠순 크루즈 2차안 HTML 빌더 — 나하 벨리시마 A안 중심 가이드북"""
+import json, re, html
+
+import os
+D = os.path.dirname(os.path.abspath(__file__)) + '/'
+OUT = 'D:/정이서/엄마칠순/엄마칠순_크루즈_2차안.html'
+
+b = json.load(open(D+'b64.json'))          # hero, mini, cabins, galleria... (기존)
+ship = json.load(open(D+'ship_b64.json'))  # s_* 선내 시설 43장
+ports = json.load(open(D+'ports_b64.json'))  # ISG01… 기항지 투어 40장 + hero_*
+IMG = {}
+IMG.update({k: v for k, v in ship.items()})
+IMG.update(ports)
+# 기존 b64 중 페이지 본문에서 쓰는 것
+for k in ['hero_wide', 'mini', 'galleria_sq', 'buffet_sq', 'theatre_sq', 'pool_sq', 'pool', 'balcony', 'galleria', 'skylounge', 'aquapark', 'interior', 'oceanview', 'buffet', 'lighthouse', 'theatre', 'spa', 'cerisier']:
+    IMG[k] = b[k]
+
+t = open(D+'template.html', encoding='utf-8').read()
+
+# ── 1. 동그라미 키우기 ─────────────────────────────────────────
+t = t.replace('.bg1 .circ{width:112px;height:112px;', '.bg1 .circ{width:156px;height:156px;')
+t = t.replace('.sechd .hp{width:86px;height:86px;', '.sechd .hp{width:124px;height:124px;')
+t = t.replace(' .sechd .hp{width:62px;height:62px}', ' .sechd .hp{width:84px;height:84px}')
+t = t.replace('.bg1 .num{font-family:var(--f-num);font-weight:700;font-size:64px;', '.bg1 .num{font-family:var(--f-num);font-weight:700;font-size:70px;')
+
+# ── 2. 서랍(드로어) + 클릭 카드 CSS ───────────────────────────
+extra_css = '''
+/* ── 서랍: 카드 누르면 사진·정보 ── */
+.dim{position:fixed;inset:0;background:rgba(60,40,25,.45);opacity:0;pointer-events:none;transition:.25s;z-index:9998}
+.dim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,94vw);background:var(--paper);z-index:9999;
+ transform:translateX(105%);transition:.32s cubic-bezier(.2,.8,.2,1);overflow-y:auto;box-shadow:-20px 0 50px -20px rgba(60,40,25,.5)}
+.drawer.on{transform:none}
+.drawer .dhead{position:relative}
+.drawer .dhead img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:var(--cream2)}
+.drawer .dclose{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--ink);
+ font-size:22px;cursor:pointer;box-shadow:0 8px 20px -8px rgba(0,0,0,.5)}
+.drawer .dclose:focus-visible{outline:3px solid var(--gold)}
+.drawer .dbody{padding:22px 26px 40px}
+.drawer .den{font-family:var(--f-en);font-size:22px;color:var(--terra);line-height:1.1}
+.drawer h3{font-size:28px;margin:2px 0 6px}
+.drawer .dsub{font-family:var(--f-hd);font-size:16px;color:#6b5745;margin-bottom:14px}
+.drawer .dtags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.drawer .dtags span{font-size:12px;font-weight:800;padding:4px 11px;border-radius:20px;background:#fff;border:1.4px solid var(--line);color:var(--ink2)}
+.drawer .dtags span.free{background:#eaf1ea;color:#4f7a58;border-color:#c6dbc9}
+.drawer .dtags span.pay{background:#fdf0e4;color:#a75a25;border-color:#eccfaf}
+.drawer .dtags span.pick{background:#fff5d6;color:#8a6a2e;border-color:#f0dcae}
+.drawer p{font-size:15px;line-height:1.75;color:var(--ink2);margin-bottom:12px}
+.drawer p b{color:var(--ink)}
+.drawer ul{margin:0 0 14px 20px;font-size:14.5px;color:var(--ink2);line-height:1.7}
+.drawer .tip{background:#fff8e8;border:1.5px solid #f0dcae;border-radius:14px;padding:12px 16px;font-size:14px;color:#8a6a2e;margin-top:6px}
+.drawer .tip b{color:#6f4f1c}
+.drawer .gal{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 14px}
+.drawer .gal img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;display:block;background:var(--cream2)}
+.drawer table{font-size:13.5px}
+.drawer .tbl{margin-bottom:14px}
+body.lock{overflow:hidden}
+
+/* 클릭 카드 */
+.tap{cursor:pointer}
+.tap:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.pc .more,.gcard .more,.xc .more{display:inline-block;margin-top:8px;font-family:var(--f-hand);font-size:17px;color:var(--terra)}
+.pc.tap:hover .more,.gcard.tap:hover .more,.xc.tap:hover .more{text-decoration:underline}
+
+/* 시설 카테고리 탭 */
+.cats{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.cats button{font:inherit;font-size:14px;font-weight:800;color:var(--ink2);background:#fff;border:1.4px solid var(--line);padding:9px 16px;border-radius:24px;cursor:pointer;transition:.2s}
+.cats button:hover,.cats button.on{border-color:var(--terra);color:var(--terra);background:#fdf3ea}
+.cats button b{font-family:var(--f-num);font-size:22px;line-height:.8;margin-left:4px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.fc{background:#fff;border:1.5px solid var(--line);border-radius:18px;overflow:hidden;transition:.25s;box-shadow:0 5px 16px -12px rgba(90,60,35,.55);cursor:pointer;display:flex;flex-direction:column}
+.fc:hover{transform:translateY(-6px);border-color:var(--terra);box-shadow:0 22px 40px -20px rgba(90,60,35,.62)}
+.fc img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:var(--cream2)}
+.fc .in{padding:12px 14px 12px;flex:1;display:flex;flex-direction:column}
+.fc .nm{font-family:var(--f-hd);font-size:17.5px;line-height:1.25;margin-bottom:3px}
+.fc .ds{font-size:13.2px;color:var(--ink2);line-height:1.55;flex:1}
+.fc .ft{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.fc[hidden]{display:none}
+.pin.p-free{background:#eaf1ea;color:#4f7a58;border:1px solid #c6dbc9}
+.pin.p-pay{background:#fdf0e4;color:#a75a25;border:1px solid #eccfaf}
+.pin.p-pick{background:#fff5d6;color:#8a6a2e;border:1px solid #f0dcae}
+
+/* 기항지 */
+.port{background:#fff;border:1.5px solid var(--line);border-radius:26px;overflow:hidden;margin-bottom:26px;box-shadow:0 8px 24px -16px rgba(90,60,35,.5)}
+.port .phead{position:relative;height:300px}
+.port .phead img{width:100%;height:100%;object-fit:cover;display:block}
+.port .phead .pt{position:absolute;left:0;right:0;bottom:0;padding:22px 26px 18px;background:linear-gradient(transparent,rgba(40,25,15,.78));color:#fff}
+.port .phead .pt .en{font-family:var(--f-en);font-size:24px;color:#ffd58a;line-height:1}
+.port .phead .pt h3{font-size:34px;color:#fff;margin:2px 0 2px}
+.port .phead .pt .tm{font-size:15px;font-weight:800;opacity:.95}
+.port .pbody{padding:20px 24px 24px}
+.port .two{margin-top:14px}
+.xgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:12px}
+.xc{background:var(--paper);border:1.4px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;transition:.22s;display:flex;flex-direction:column}
+.xc:hover{transform:translateY(-5px);border-color:var(--terra);box-shadow:0 18px 32px -18px rgba(90,60,35,.6)}
+.xc img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--cream2)}
+.xc .in{padding:10px 12px 11px}
+.xc .nm{font-size:14.5px;font-weight:800;line-height:1.3;margin-bottom:3px}
+.xc .mt{font-size:12.3px;color:var(--ink2)}
+.xc.best{border:2px solid var(--gold)}
+.route2{list-style:none;counter-reset:r}
+.route2 li{position:relative;padding:8px 0 8px 40px;border-bottom:1.2px dotted #e3d5be;font-size:14.5px;line-height:1.6;color:var(--ink2)}
+.route2 li:last-child{border-bottom:0}
+.route2 li::before{content:counter(r);counter-increment:r;position:absolute;left:0;top:9px;width:28px;height:28px;border-radius:50%;background:var(--sea);color:#fff;font-family:var(--f-hand);font-size:18px;text-align:center;line-height:28px}
+.route2 li b{color:var(--ink)}
+.route2 li .t{font-family:var(--f-en);color:var(--terra);font-size:15px;margin-right:6px}
+@media (max-width:860px){.port .phead{height:200px}.port .phead .pt h3{font-size:26px}.drawer .gal{grid-template-columns:1fr}}
+'''
+t = t.replace('</style>', extra_css + '</style>', 1)
+
+# ── 3. 결론 카드 문구: A안 확정 톤 ───────────────────────────
+t = t.replace('<div class="script">Our Pick</div><h2>결론 — 셋 중 하나</h2>',
+              '<div class="script">Our Pick</div><h2>결론 — 나하 벨리시마로 간다</h2>')
+t = t.replace('<span class="bd b-pick">💛 추천</span>', '<span class="bd b-pick">💛 거의 확정</span>')
+t = t.replace('<a class="solid" href="#pick">🚢 결론 세 가지 보기</a>\n<a class="ghost" href="#official">💬 공식 파트너 vs 트립닷컴</a>',
+              '<a class="solid" href="#ship">🚢 배 안 구경하기</a>\n<a class="ghost" href="#ports">🗺 기항지 루트 보기</a>')
+
+# ── 4. 객실·선내 섹션 교체 ────────────────────────────────────
+start = t.index('<div class="sec">\n<div class="sechd"><div class="hp" style="background-image:url({{IMG:balcony}})"></div>')
+end = t.index('</div></div>\n\n<div class="torn">', start)
+
+def esc(s): return html.escape(s, quote=True)
+
+# ---- 데이터: 객실 ----
+CABINS = [
+ dict(key='cab_in', img='s_be-ir', gal=['interior'], nm='디럭스 인테리어 (내측)', sz='15㎡ · 5, 8~14층 · 창 없음', won='640,378', unit='원 × 3', best=False,
+      ds='3인 합 <b>1,921,134원</b> (트립닷컴) / 크루즈TMK $1,427. 매일 기항이라 낮엔 방에 있을 일이 없어 이걸로도 충분.',
+      body='''<p><b>구성</b> — 더블 침대(요청 시 싱글 2개로 분리) + 3번째 승객용 소파베드/접이식 침대. 샤워 부스 욕실 1개, 화장대·헤어드라이어, 대화형 TV, 전화, 금고, 미니바(유료), 블루투스 스피커 ZOE, 옷장.</p>
+<ul><li>15㎡ — 호텔 비즈니스 트윈룸보다 조금 작음. 캐리어 2개는 침대 밑에 들어감</li><li>창이 없어 <b>아침에 시간 감각이 없음</b> — 알람 필수. 대신 완전히 어두워서 엄마 낮잠엔 최고</li><li>5층은 극장·프론트 가까움, 8~14층은 뷔페(15층)·수영장 가까움. 3인이면 <b>10~12층 중앙</b>이 엘리베이터·흔들림 모두 유리</li><li>1인용 스튜디오 인테리어(10㎡)도 있음 — 2+1 구성일 때</li></ul>
+<div class="tbl"><table><tr><td>트립닷컴 럭셔리 인사이드 3인</td><td class="num">640,378 × 3 = 1,921,134원</td></tr><tr><td>크루즈TMK IR1 (5~10층) 3인</td><td class="num">$1,427 ≈ 191만</td></tr><tr><td>크루즈TMK IR2 (11~14층) 3인</td><td class="num">$1,457 ≈ 195만</td></tr></table></div>
+<div class="tip"><b>엄마 기준</b> — 값을 아끼면 이 방. 다만 4박 내내 창이 없는 건 어르신께 답답할 수 있어, 발코니와 3인 합 60만 차이면 발코니를 권합니다.</div>'''),
+ dict(key='cab_ov', img='s_be_ocean_view_16', gal=['oceanview'], nm='오션뷰 (창문)', sz='12~25㎡ · 5, 8~11층 · 창문 있음', won='765,493', unit='원 (2인 1인)', best=False,
+      ds='3인 요금은 트립닷컴에 안 뜸(TMK $569~). 발코니와 값 차이가 작아 굳이 고를 이유가 적은 등급.',
+      body='''<p><b>구성</b> — 바다 쪽 창문(열리지 않음) + 안락의자. 침대·욕실·TV·금고·미니바·ZOE 스피커는 내측과 같음.</p>
+<ul><li><b>프리미엄 오션뷰 25㎡</b> (9~11층) — 최대 6인, 넓음. 3인이면 가장 여유로운 방이지만 잔여가 적음</li><li><b>디럭스 오션뷰 16㎡</b> (5층) — 프론트·극장 층</li><li><b>주니어 오션뷰 12㎡</b> (8층) — 구명정이 앞에 있어 <b>시야 일부 가림</b>인 방 있음. 예약 시 "obstructed" 표시 확인</li></ul>
+<div class="tbl"><table><tr><td>트립닷컴 오션뷰 2인 1실 1인</td><td class="num">765,493원</td></tr><tr><td>크루즈TMK 오션뷰 3인 (부터)</td><td class="num">$569 × 3 ≈ 229만</td></tr></table></div>
+<div class="tip">발코니(BR1 3인 252만)와 20만 남짓 차이라 <b>창문만 있는 방보다 발코니</b>가 낫습니다. 프리미엄 25㎡가 남아 있으면 그때만 고려.</div>'''),
+ dict(key='cab_bl', img='s_be_balcony_01', gal=['balcony'], nm='디럭스 발코니 💛', sz='17㎡ + 발코니 4㎡ · 8~14층', won='842,177', unit='원 × 3', best=True,
+      ds='3인 합 <b>2,526,531원</b> / TMK BR1 $1,877. 엄마 침대 + 아침 바다 + 세 식구 한 방 — 칠순 선물이면 이게 값을 합니다.',
+      body='''<p><b>구성</b> — 더블 침대(분리 가능) + 소파(3번째 침대로 전환) + 개인 발코니(의자 2·테이블). 샤워 부스 또는 욕조 욕실, 화장대, TV, 전화, 금고, 미니바, ZOE 스피커.</p>
+<ul><li><b>BR1 디럭스 발코니</b> 8~10층 — 기본. 3인 $1,877 (TMK) / 842,177×3 (트립닷컴)</li><li><b>BP 파셜뷰</b> 8·14층 — 구명정·구조물로 <b>시야 일부 가림</b>. 3인 $1,777 / 797,781×3. 10만 아끼는 대신 바다가 반쯤 가림 → 엄마 선물이면 비추</li><li><b>BA 아우레아</b> 11~13층 — 요금제가 다름: 우선 승선·수하물, 스파 열탕 구역 무료, 웰컴 프로세코·초콜릿, <b>원하는 시간에 정찬</b>(시간 배정 없음), 전용 솔라리움, 스파 10% 할인. 3인 $2,157 (BR1보다 +38만)</li><li>이시가키·미야코지마 입출항이 발코니에서 보이는 <b>우현(스타보드)</b>·<b>좌현</b>은 항로마다 달라 어느 쪽이든 하루는 섬 쪽</li></ul>
+<div class="tbl"><table><tr><td>트립닷컴 럭셔리 발코니 3인</td><td class="num">842,177 × 3 = 2,526,531원</td></tr><tr><td>트립닷컴 발코니(일부 가림) 3인</td><td class="num">797,781 × 3 = 2,393,343원</td></tr><tr><td>크루즈TMK BR1 3인</td><td class="num">$1,877 ≈ 252만</td></tr><tr><td>크루즈TMK BP 파셜뷰 3인</td><td class="num">$1,777 ≈ 238만</td></tr><tr><td>크루즈TMK BA 아우레아 3인</td><td class="num">$2,157 ≈ 289만</td></tr></table></div>
+<div class="tip"><b>추천 = BR1 8~10층.</b> 아우레아의 「원하는 시간에 식사」는 어르신과 다닐 땐 정말 편하지만 38만 값어치인지는 취향. 아침에 발코니에서 커피 한 잔이 이 여행의 사진입니다.</div>'''),
+ dict(key='cab_st', img='s_msc-yacht-club-pool', gal=['spa'], nm='스위트 · 요트클럽', sz='요트클럽 = 배 안의 배 (전용 라운지·풀·집사)', won='$1,159', unit='~ (3인 1인)', best=False,
+      ds='스위트 3인 $3,477~ / 요트클럽은 별도. 전용 풀·라운지·음료 무제한·집사. 칠순이라도 여기까진 과함.',
+      body='''<p><b>스위트</b> — 그랜드 스위트 아우레아(테라스+자쿠지), 프리미엄 스위트 아우레아. 아우레아 혜택 전부 포함. TMK 3인 $3,477(≈466만)부터.</p>
+<p><b>MSC 요트클럽</b> — 18~19층 앞쪽 전용 구역. 전용 라운지(탑 세일)·레스토랑·선덱 풀·그릴 바, 24시간 집사, <b>음료 패키지 포함</b>, 우선 승하선. 리뷰: "18층 발코니에서 석양, 미니바 매일 무료 채움, 룸서비스 피자". 2인 1실 1인 150만 안팎 예상 — 3인이면 400만 이상.</p>
+<div class="tip">가족 셋이 배 구경하고 기항지 다니는 여행이라 요트클럽 값어치는 낮습니다. 대신 <b>스파 열탕 구역 1일권</b>이나 <b>스페셜티 저녁 한 번</b>으로 "특별함"을 사는 게 효율적.</div>'''),
+]
+
+# ---- 데이터: 선내 시설 ----
+# cat: dine(정찬·뷔페) / spec(유료 레스토랑) / bar / show / play / relax
+FAC = [
+ dict(cat='dine', img='s_lighthouse-restaurant', nm='라이트하우스 · 르 세리지에 · 일 칠리에지오 · 포시도니아', ds='정찬(메인) 레스토랑 4곳. 매일 저녁 코스, 메뉴가 날마다 바뀜.', tag='free',
+      title='정찬 레스토랑 4곳', sub='Lighthouse · Le Cerisier · Il Ciliegio · Posidonia', gal=['s_le_cerisier_msc_bellissima','s_il_ciliegio_restaurant','s_posidonia_restaurant'],
+      body='''<p>요금에 <b>포함</b>. 예약 시 배정된 레스토랑·시간(보통 1부 17:30~18:00 / 2부 20:00 전후)에 <b>세 식구 한 테이블</b>로 매일 같은 자리. 전채·수프·메인·디저트 코스이고 메뉴는 매일 바뀝니다. 아시아 노선이라 <b>중식·일식 메뉴</b>가 한 줄 항상 있고, 마지막 날 전후로 갈라 디너(랍스터 등)가 한 번.</p>
+<ul><li>아침·점심도 정찬 레스토랑에서 앉아서 먹을 수 있음(뷔페보다 조용). 시간표는 매일 저녁 방에 오는 「데일리 프로그램」</li><li>물·커피·차 무료. 와인·맥주·탄산은 유료(음료 패키지 있으면 포함)</li><li>드레스코드: 갈라 밤만 "정장 권장" — 엄마 원피스 한 벌, 우리는 블라우스면 충분</li><li>리뷰: "메인 레스토랑 중식이 서양식보다 맛있었다", "체리(르 세리지에) 랍스터 좋았다"</li></ul>
+<div class="tip"><b>엄마 팁</b> — 배정 시간이 2부(20시)면 어르신께 늦습니다. 승선 첫날 레스토랑 데스크에서 <b>1부로 바꿔달라</b>고 하면 대부분 됩니다. 아우레아 요금제는 시간 자유.</div>'''),
+ dict(cat='dine', img='s_be_restaurant_and_bar_market_place_05', nm='마켓플레이스 뷔페', ds='15층 · 하루 20시간 · 100종 이상. 아침은 여기가 편합니다.', tag='free',
+      title='마켓플레이스 뷔페', sub='Marketplace Buffet · 15층 · 06:00~다음날 02:00', gal=[],
+      body='''<p>요금에 <b>포함</b>. 아침·점심·저녁·야식까지 하루 20시간. 국제식·아시안·피자·파스타·샐러드·디저트·과일 코너가 따로 있고 바다 보이는 창가 자리가 많습니다. 리뷰: "양갈비·구운 고기·순대·밀크티·피자까지", "마지막 날 밤엔 랍스터와 비둘기 구이".</p>
+<ul><li>승선 첫날 점심(방 배정 전)은 여기서 — 14:00 전에 타면 점심 가능</li><li>기항지 다녀온 늦은 오후에도 열려 있어 <b>출출할 때 언제든</b></li><li>물·커피·차·주스(아침) 무료. 소프트아이스크림은 옆 아이스크림 바(유료)</li><li>붐비는 시간: 08:00~09:30, 12:30~13:30. 엄마와는 <b>07:30 또는 09:45</b></li></ul>'''),
+ dict(cat='dine', img='s_be_galleria_bellissima', nm='갤러리아 벨리시마', ds='96m LED 돔 실내 산책로. 카페·상점·바가 양옆에. 저녁엔 돔 쇼.', tag='free',
+      title='갤러리아 벨리시마', sub='Galleria Bellissima · 6~7층 · 80m LED 돔', gal=['s_jean-philippe-chocolat-cafe','s_jean-philippe-crepe-gelato'],
+      body='''<p>배의 중심 거리. 2층 높이 실내 산책로 천장 전체가 LED라 시간마다 하늘·별·명화가 바뀌고, 저녁엔 돔 쇼(무료)와 파티가 열립니다. 양옆으로 장-필립 초콜릿 카페, 크레프·젤라토, 부티크, 바, 유료 레스토랑(부처스컷·카이토·홀라)이 이어집니다.</p>
+<ul><li>사진 명당: 갤러리아 한가운데 <b>스와로브스키 크리스탈 계단</b> — 리뷰마다 "여기서 찍었다"</li><li>초콜릿·크레프·젤라토는 유료(각 $4~8). 커피는 패키지 있으면 포함</li><li>매일 밤 21시 전후 돔 쇼 + 댄스파티. 엄마와 산책하기 딱 좋은 시간은 <b>저녁 식사 후 20:30~21:30</b></li></ul>'''),
+ dict(cat='spec', img='s_be_restaurant_and_bar_butcher_s_cut_03', nm="부처스 컷 스테이크하우스", ds='미국식 스테이크. 앵거스 드라이에이징. 1인 $45~55 추정.', tag='pay',
+      title="부처스 컷", sub="Butcher's Cut · 유료 · 6층 갤러리아", gal=[],
+      body='''<p>린츠 헤리티지 앵거스 소고기를 정육장인이 잘라 숙성한 미국식 스테이크하우스. 뉴월드 와인·칵테일. 리뷰: "유료 스테이크집이 정말 최고였다, 상하이 스테이크집보다 싸게 느껴짐".</p>
+<ul><li>가격은 알라카르트 또는 <b>정액 세트($45~55/인, 추정)</b>. 사전 구매 다이닝 패키지(2~4끼)로 사면 10~20% 저렴</li><li>칠순 당일 저녁 여기서 <b>케이크 사전 요청</b> 가능 — 예약 시 "birthday" 메모</li></ul>
+<div class="tip"><b>칠순 저녁은 여기</b> — 조용하고 서빙이 정중해서 어르신과 딱. 3인 $150 안팎.</div>'''),
+ dict(cat='spec', img='s_be_restaurant_and_bars_kaito_04', nm='카이토 데판야키', ds='눈앞에서 구워주는 철판요리. 4개 조리대. 1인 $45~ 추정.', tag='pay',
+      title='카이토 데판야키', sub='Kaito Teppanyaki · 유료', gal=['s_kaito_sushi_bar'],
+      body='''<p>철판 조리대 4개 중 한 자리에 앉아 셰프가 불쇼와 함께 구워주는 일본식 데판야키. 옆의 <b>카이토 스시 바</b>는 즉석 스시·아시안 요리(알라카르트, 접시당 $6~15).</p>
+<ul><li>데판야키는 세트($45~60/인 추정), 스시는 접시별 과금 — 가볍게 먹으면 $20 안팎</li><li>어르신 취향엔 데판야키가 무난(구운 새우·소고기·볶음밥)</li></ul>'''),
+ dict(cat='spec', img='s_hola-tacos-cantina', nm='홀라! 타코 & 칸티나', ds='멕시코 길거리 음식. 타코·나초·엠파나다. 접시당 $5~12.', tag='pay',
+      title='홀라! 타코 & 칸티나', sub='Hola! Tacos & Cantina · 유료 · 6층 갤러리아', gal=[],
+      body='''<p>블루콘 타코·나초·엠파나다·타말레·토르티야 수프. 점심·저녁. 캐주얼하고 저렴한 편(접시당 $5~12). 테킬라·메스칼 Top10.</p><div class="tip">엄마와는 한 번쯤 "간식"으로. 매운 건 조절 가능.</div>'''),
+ dict(cat='spec', img='s_sea_pavilion_jereme_leung', nm='씨 파빌리온 핫팟', ds='아시아 노선 전용 핫팟(훠궈). 나눠 먹기 좋음.', tag='pay',
+      title='씨 파빌리온', sub='Sea Pavilion Hot Pot · 유료 · 중국·일본 노선만', gal=[],
+      body='''<p>제레미 렁 셰프의 아시안 퓨전 핫팟. 3인이 냄비 하나 나눠 먹는 구조라 <b>어르신과 제일 편한 유료 식당</b>. 세트 $40~50/인 추정.</p>'''),
+ dict(cat='bar', img='s_sky-lounge', nm='스카이 라운지', ds='피아노 라이브 + 무료 핫·콜드 스낵. 저녁 전 한 잔.', tag='free',
+      title='스카이 라운지', sub='Sky Lounge · 라이브 피아노', gal=[],
+      body='''<p>기항지 다녀와서 앉아 있기 좋은 라운지. 피아노 라이브가 있고 <b>무료 스낵(핫·콜드)</b>이 나옵니다. 음료만 유료. 엄마와 저녁 식사 전 30분 "아페리티프" 자리.</p>'''),
+ dict(cat='bar', img='s_masters-of-the-sea', nm='마스터스 오브 더 시 (영국식 펍)', ds='맥주·위스키·스낵. 저녁 라이브 밴드.', tag='pay',
+      title='마스터스 오브 더 시', sub="Masters of the Sea · 영국식 펍", gal=['s_champagne-bar','s_infinity-bar'],
+      body='''<p>전통 영국 펍 분위기. 생맥주·위스키·안주. 저녁엔 밴드. 옆으로 <b>샴페인 바</b>(샴페인·굴·캐비어), <b>인피니티 바</b>(시그니처 칵테일) 등 갤러리아에 바가 20개.</p>
+<ul><li>맥주 $6~8, 칵테일 $10~14, 와인 잔 $8~12 + 서비스료 15% (패키지 없을 때)</li><li>Easy 패키지면 하우스 와인·생맥주·기본 칵테일 하루 15잔까지 포함</li></ul>'''),
+ dict(cat='bar', img='s_atmosphere-bar-north', nm='아트모스피어 바 · 그릴 · 아이스크림 바', ds='15층 수영장 옆. 콜라다·맥주·그릴 간식·소프트아이스크림.', tag='pay',
+      title='수영장 바 3곳', sub='Atmosphere Bar North / South(그릴) / Ice Cream Bar · 15층', gal=['s_atmosphere-bar-south','s_atmosphere-ice-cream-bar','s_horizon-bar'],
+      body='''<p>수영장 양쪽에 바 둘, 그릴(햄버거·핫도그, 일부 무료 시간대), 소프트아이스크림 6가지 + 프로즌 칵테일. 16층 뒤쪽 <b>호라이즌 바</b>는 바다 전망 최고.</p><div class="tip">낮에 배 위에서 사진 제일 잘 나오는 곳 = 호라이즌 바 뒤 갑판.</div>'''),
+ dict(cat='bar', img='s_tv-studio-bar', nm='TV 스튜디오 & 바 · 스포츠 바 · 카지노 바', ds='퀴즈·게임쇼 생방송, 노래방, 무료 핫도그(스포츠바).', tag='pay',
+      title='TV 스튜디오 · 스포츠 바 · 카지노 바', sub='TV Studio & Bar · Sports Bar · Imperial Casino Bar', gal=['s_sports-bar','s_imperial-casino-bar'],
+      body='''<p><b>TV 스튜디오</b>: 배 전체로 방송되는 퀴즈·탤런트쇼·노래방 — 리뷰에 "중국어 만담 공연"도 여기. <b>스포츠 바</b>: 경기 중계 + <b>무료 핫도그</b>. <b>카지노</b>: 18세 이상, 공해상에서만 오픈(기항 중 닫힘) — 매일 기항하는 이 항로에선 저녁~밤에만.</p>'''),
+ dict(cat='bar', img='s_carousel-lounge_be', nm='카루셀 라운지 (서커스 쇼)', ds='SWEET · MYÜT 아크로바틱 쇼. 유료(칵테일 패키지).', tag='pay',
+      title='카루셀 프로덕션 앳 시', sub='Carousel Lounge · 유료 · 하루 2회, 주 6일', gal=['s_carousel-prod-at-sea','s_attic-club-gr_desktop'],
+      body='''<p>1,000㎡ 전용 라운지(400석)에서 하는 아크로바틱·댄스·라이브 뮤직 오리지널 쇼 두 편 — <b>SWEET</b>(사탕 나라) · <b>MYÜT</b>(곡예사들의 마법 세계). 시그니처 칵테일 패키지($20~25 추정)를 사면 프리쇼 + 본 쇼.</p>
+<ul><li>4박이면 한 번은 볼 만함. 자리가 한정이라 승선 첫날 예약</li><li>같은 층 <b>애틱 클럽</b>은 새벽까지 나이트클럽 — 우리는 패스</li></ul>'''),
+ dict(cat='show', img='s_london-theatre_be', nm='런던 극장', ds='브로드웨이식 쇼 매일 밤 무료. 6~7층 앞쪽.', tag='free', pick=True,
+      title='런던 극장', sub='The London Theatre · 6~7층 · 무료', gal=[],
+      body='''<p>요금 <b>포함</b>. 매일 밤 2회(1부 정찬 후 / 2부 정찬 후) 30~45분짜리 뮤지컬·아크로바틱·마술·댄스 쇼. 리뷰: "쇼는 기대 이상, 마지막 날 쇼가 최고". 아시아 노선은 대사가 적은 비주얼 쇼 위주라 <b>언어 걱정 없음</b>.</p>
+<ul><li>좌석 예약: MSC for Me 앱 또는 방 TV로 전날 예약(무료). 좋은 자리는 개장 20분 전</li><li>1부 정찬(17:30)이면 19:30 쇼, 2부면 21:30 쇼</li></ul>'''),
+ dict(cat='show', img='s_family-entertainment', nm='매일 밤 갤러리아 파티 · 테마 나이트', ds='화이트 파티, 70·80s 나이트, 돔 쇼. 무료.', tag='free',
+      title='선상 파티 · 테마 나이트', sub='갤러리아 · 아트모스피어 풀 · 무료', gal=['s_grandiosa-bar-lounge'],
+      body='''<p>매일 밤 갤러리아 또는 15층 수영장에서 테마 파티(화이트 나이트, 트로피컬, 게츠비 등). 낮엔 댄스 클래스·요가·공예·퀴즈가 시간표대로. 데일리 프로그램에 전부 적혀 오고 <b>대부분 무료</b>.</p>
+<div class="tip">엄마가 좋아하실 것: 오전 <b>라인댄스·줌바(무료)</b>, 오후 <b>공예 클래스</b>, 저녁 갤러리아 <b>라이브 밴드</b>. 빙고는 유료($10~20).</div>'''),
+ dict(cat='play', img='s_be_entertainment_polar_aquapark_01', nm='애리조나 아쿠아파크', ds='18층. 그랜드캐년 테마 슬라이드 3개(운항 중 2개). 무료.', tag='free',
+      title='애리조나 아쿠아파크', sub='Arizona Aquapark · 18~19층 · 무료', gal=[],
+      body='''<p>슬라이드 3개(튜브 1인·2인용 하나, 튜브 없는 것 하나) + 어린이 물놀이 구역. 12월 나하 항로는 낮 20도 안팎이라 물놀이는 <b>해 잘 드는 낮 1~3시</b>에만. 리뷰: "기항일에 가면 줄이 없다".</p>'''),
+ dict(cat='play', img='s_be_entertainment_f1_simulators_05', nm='F1 시뮬레이터 · 볼링 · 스포츠플렉스', ds='F1 레이서 $10~/회, 볼링 $15~/레인, 농구·탁구 무료.', tag='pay',
+      title='MSC 포뮬러 레이서 · 볼링 · 스포츠플렉스', sub='7층 · 볼링 정규 레인 2개 · 실내 스포츠장', gal=['s_be_entertainment_full_size_bowling_alley_06','s_be_entertainment_sportplex_04'],
+      body='''<p><b>F1 시뮬레이터</b>(진짜 F1 모형, 1회 $10~15 추정 · 리뷰엔 "$120/세션" 언급도 있어 확인 필요) · <b>정규 볼링</b> 2레인($15~20/게임) · <b>스포츠플렉스</b> 실내 농구·배구·탁구(무료) + 저녁엔 디스코.</p><div class="tip">세 식구 볼링 한 게임은 사진 남기기 좋은 이벤트.</div>'''),
+ dict(cat='play', img='s_be_entertainment_mini_and_juniors_clubs_07', nm='키즈클럽 (LEGO · Chicco)', ds='700㎡ 어린이 구역. 우리 일행엔 해당 없음.', tag='free',
+      title='키즈클럽', sub='LEGO 미니클럽 · Chicco 베이비클럽 · 틴즈', gal=[],
+      body='''<p>0~17세 연령별 7개 방, 무료. 우리 일행엔 해당 없지만 배가 <b>가족 승객이 많아 낮에 활기찬</b> 분위기라는 뜻.</p>'''),
+ dict(cat='relax', img='s_atmosphere-pool', nm='아트모스피어 풀 · 자쿠지', ds='15층 메인 수영장 + 대형 스크린. 자쿠지 4개. 무료.', tag='free', pick=True,
+      title='아트모스피어 풀', sub='Atmosphere Pool · 15층 · 무료', gal=['s_msc-yacht-club-pool'],
+      body='''<p>승객 1인당 10㎡ 공용 공간 — 바다 위에서 가장 넓은 편. 메인 풀 + 자쿠지 4개 + 대형 스크린(저녁 영화). 12월엔 <b>자쿠지</b>가 정답. 수건은 풀 옆에서 무료. 선베드는 오전 10시 전에 잡아야 함.</p>
+<ul><li>실내 풀(온실형)도 있어 비 오는 날 OK</li><li>요트클럽 풀은 전용(입장 불가)</li></ul>'''),
+ dict(cat='relax', img='spa', nm='아우레아 스파 · 열탕 구역', ds='발리니즈 마사지, 사우나·스팀·열탕 구역(유료 패스).', tag='pay', pick=True,
+      title='MSC 아우레아 스파', sub='Aurea Spa · 7층 · 유료', gal=[],
+      body='''<p>발리 스타일 스파. 마사지·페이셜·네일·미용실 + <b>열탕 구역</b>(사우나·스팀·소금방·열탕 침대·자쿠지). 첫날 "포트 데이 스페셜"로 20~30% 할인 전단이 방에 옵니다.</p>
+<ul><li>열탕 구역 패스: 1일 $30~40 / 크루즈 전체 $80~100 (추정)</li><li>발리니즈 마사지 50분 $130~170 (추정, 팁 별도)</li><li>아우레아 발코니(BA) 요금제면 열탕 구역 무료</li></ul>
+<div class="tip"><b>칠순 선물로 딱</b> — 엄마 마사지 50분 + 우리 둘 열탕 패스. 기항지 다녀온 셋째 날 오후(미야코지마 18시 출항 후)가 비어 있어 이때 예약.</div>'''),
+ dict(cat='relax', img='s_top-sale-lounge', nm='헬스장 · 조깅 트랙 · 미용실', ds='16층 헬스장 무료, 갑판 조깅 트랙, 미용실 유료.', tag='free',
+      title='피트니스 · 조깅 트랙', sub='16층 · 무료', gal=['s_msc-yacht-club-grill-bar'],
+      body='''<p>바다 보이는 헬스장(무료, 요가·스트레칭 클래스 일부 유료), 갑판 파워워킹·조깅 트랙. 아침 7시 엄마와 <b>갑판 한 바퀴(약 400m)</b>가 이 배의 아침 루틴.</p>'''),
+]
+
+# ---- 데이터: 기항지 ----
+PORTS = [
+ dict(key='naha', hero='hero_naha', en='Day 1 & Day 5 · Naha', nm='나하 (오키나와)', tm='12/14(월) 승선 마감 17:00 · 19:00 출항 → 12/18(금) 07:00 도착 · 하선',
+      intro='류큐 왕국의 수도. 나하 크루즈터미널(와카사)에서 고쿠사이도리까지 택시 10분. 12월 낮 20~22도, 긴팔 하나면 됨. 첫날은 승선만, <b>마지막 날 아침 07:00 하선 → 15:00 비행기</b> 사이 6시간이 나하 관광 시간입니다.',
+      exc=[('NAH113','나하 베스트 → 공항 하차','4.4h','시티투어','하선일 딱 맞춤. 슈리성·고쿠사이도리 돌고 <b>공항에서 내려줌</b>. 짐도 버스에. 15:00 비행기와 맞물림',True),
+           ('NAH11','나하 하이라이트 + 점심','5.5h','문화·역사','슈리성(세계유산) → 고쿠사이도리 2km 자유. 점심 포함. 베스트셀러',False),
+           ('NAH51','나하 베스트','4.4h','시티투어','슈리성 80분 가이드(2019 화재 후 복원 현장) + 고쿠사이도리',False),
+           ('NAH53','슈리성 + 시키나엔 정원','5.2h','문화·역사','세계유산 두 곳. 시키나엔은 류큐 왕가 별장 정원 — 어르신 산책에 좋음',False),
+           ('NAH22','만자모 + 류큐무라','3.5h','절경','코끼리 바위 만자모 40분 + 류큐무라 민속촌 80분 + 쇼핑. 짧고 알참',False),
+           ('NAH08','아와모리 양조장 + 류큐 무용 점심','5.5h','스페셜','오키나와 소주 양조장 시음 + 전통 무용 보며 점심 1시간',False),
+           ('NAH20','세이파우타키 + 교쿠센도 동굴','6.2h','스페셜','성지 세이파우타키 숲길 1시간 + 종유동굴. 걷기 많음',False),
+           ('NAH77','만자모 + 류큐무라 + 점심','7h','문화·역사','NAH22 확장판. 점심 포함 하루 종일',False),
+           ('NAH21','오키나와 전쟁 역사','4.2h','문화·역사','평화기념공원 + 히메유리 박물관. 무거운 주제',False),
+           ('NAH06','문화·역사 오키나와 (해군사령부호)','5h','문화·역사','지하 사령부 터널 80분 + 문화 체험',False)],
+      route=[('07:00','<b>하선</b> — 큰 짐은 터미널 짐 보관(500엔) 또는 NAH113 버스에'),
+             ('07:40','택시 15분 → <b>슈리성</b> (입장 400엔) 복원 현장 + 슈레이문 사진 · 1시간'),
+             ('09:20','택시 15분 → <b>고쿠사이도리</b> · 마키시 공설시장 2층에서 아침 겸 점심(회·소바) · 기념품'),
+             ('11:30','택시 10분 → <b>나하공항</b> (국제선 터미널) · 출국세는 배에서 이미 냄'),
+             ('15:00','이스타 15:00 → 인천 17:50 · 세 식구 짐 부치고 라운지 대기')],
+      tip='엄마 걸음이면 슈리성 하나만 하고 고쿠사이도리에서 쉬는 게 낫습니다. 비 오면 슈리성 대신 <b>DFS 갤러리아(면세점)</b>. 전날(12/13) 도착 안이면 고쿠사이도리 호텔 1박 → 14일 오전 슈리성 → 15시 승선.'),
+ dict(key='ishigaki', hero='hero_ishigaki', en='Day 2 · Ishigaki', nm='이시가키', tm='12/15(화) 09:00 ~ 19:00 (10시간)',
+      intro='야에야마 제도의 중심. 항구가 시내 한복판(이도 터미널)이라 <b>내려서 걸으면 바로 시내</b>. 카비라만(에메랄드 바다·글라스보트)까지 택시 35분. 12월 낮 22~24도. 검은진주·이시가키 소고기·야이마무라 민속촌.',
+      exc=[('ISG50','야이마무라 민속촌 + 카비라만 포토','3h','문화·역사','민속촌 1시간 가이드 + 카비라만 30분 + 진주숍. <b>짧고 걷기 적어 엄마 최적</b>',True),
+           ('ISG01','이시가키 베스트','6.5h','시티투어','카비라만 글라스보트 30분(90분 체류) + 진주숍 + 류큐식 점심 + 오후 관광',False),
+           ('ISG49','카비라만 → 종유동굴','6.5h','절경','글라스보트 + 진주숍 + 이시가키 종유동굴(조명 동굴)',False),
+           ('ISG51','종유동굴 + 카비라만 포토','3h','자연','동굴 1시간 + 카비라만 30분. 짧은 코스',False),
+           ('ISG06','와규 야키니쿠 점심 + 카비라만','7h','스페셜','글라스보트 + 진주숍 + 야이마무라 + <b>이시가키 소고기 야키니쿠 점심</b>',False),
+           ('ISG07','문화 체험 (도자기·시사 만들기)','5.5h','문화·역사','에메랄드 전망대 + 이시가키야키 공방(시사 만들기) + 야이마무라',False),
+           ('ISG02','섬 일주 관광','5h','절경','타마토리자키 전망대 + 시사 정원 + 북부 해안',False),
+           ('ISG04','이리오모테섬','7.5h','자연','페리 40분 + 맹그로브 보트 + 물소 수레로 유후섬. 하루 종일·이동 많음',False),
+           ('ISG03','다케토미섬','4h','시티투어','페리 10분, 붉은 기와 마을 + 물소 수레',False),
+           ('ISG05','맹그로브 카누 · SUP · 트레킹','2~4h','액티브','미야라강 카누(ISG05·53) / SUP(ISG52) / 노소코다케 트레킹(ISG54)',False)],
+      route=[('09:00','<b>하선</b> → 터미널 앞 택시 승강장. 관광택시 3시간 대절 12,000~15,000엔 (3인 나눠 1인 5만)'),
+             ('09:40','<b>카비라만</b> — 전망 데크 사진 + 글라스보트 30분(1,300엔) · 검은진주 가게 구경 · 1시간 20분'),
+             ('11:20','<b>야이마무라 민속촌</b> (1,000엔) — 붉은 기와 옛집, 다람쥐원숭이 · 50분'),
+             ('12:30','시내 복귀 → <b>이시가키 소고기</b> 점심 (야키니쿠 1인 3,000~5,000엔) 또는 야에야마 소바(900엔)'),
+             ('14:00','<b>유글레나몰</b> 아케이드 산책 · 시장 · 소금 아이스크림 · 항구까지 도보 10분'),
+             ('16:00','승선 (마감 18:30) · 발코니에서 출항 보며 저녁')],
+      tip='택시는 항구 앞에 늘 있고 기사들이 "카비라 3시간" 코스를 다 압니다. 짧게 다니려면 MSC ISG50(3시간)이 제일 무난 — 1인 $60~80 예상.'),
+ dict(key='keelung', hero='KEE05', en='Day 3 · Keelung / Taipei', nm='지룽 · 타이베이', tm='12/16(수) 07:00 ~ 18:00 (11시간)',
+      intro='대만 북부 항구. 항구가 지룽 시내 한복판(묘구 야시장 도보 10분). <b>예류 지질공원 30분 · 지우펀 40분 · 타이베이 시내 1시간</b>. 12월 지룽은 비가 잦고 18~20도 — 우산·바람막이. 한국 여권 무비자.',
+      exc=[('KEE05','지룽 하이라이트 + 예류','4.5h','절경','중정공원 관음상 30분 → <b>예류 지질공원 90분</b>(여왕머리) → 진산 옛거리 40분. 베스트셀러',True),
+           ('KEE06','지우펀 + 핑시 천등 날리기','5h','스페셜','지우펀 90분 자유 + 핑시에서 천등에 소원 써서 날리기(4인 1등). 엄마 사진 명장면',True),
+           ('KEE07','지우펀 마을','4.5h','시티투어','지우펀 2시간 30분 자유 + 밀크티·과자 시식. 계단·인파 많음',False),
+           ('KEE55','지우펀 + 찻집 체험','5h','문화·역사','지우펀 옛거리 + 전통 찻집에서 차·다과 (아메이 찻집 사진)',False),
+           ('KEE56','중정기념당 + 차 + 발마사지','7h','스페셜','중정기념당 → 차 시음 → <b>발마사지</b>. 어르신 취향',False),
+           ('KEE51','타이베이101 전망대 + 룽산사','5h','스페셜','101 전망대 90분 + 쇼핑 30분 + 룽산사. 휠체어 가능',False),
+           ('KEE02','타이베이101 전망대 + 바오안 사원','5h','스페셜','101 전망대 80분 + 룽산사 + 바오안 사원',False),
+           ('KEE03','룽산사 + 타이베이 시내','5.5h','시티투어','룽산사·중정기념당·101 포토·송산문창원구',False),
+           ('KEE50','고궁박물원 + 중정기념당','5.5h','문화·역사','국립고궁박물원 90분(취옥백채) + 충렬사 + 중정기념당 + 101 포토',False),
+           ('KEE20','북부 해안 하루 종일','8h','절경','예류 + 지우펀 + 대만식 점심 + 핑시 천등. 다 넣은 코스',False),
+           ('KEE08','타이베이 자유 셔틀','5h','자유','101까지 버스만 태워주고 3시간 자유. 휠체어 가능',False),
+           ('KEE57','현지인처럼 (자전거·시장·우육면)','7h','시티투어','지룽강 자전거 30분 + 난먼시장 + 우육면 + 룽산사',False)],
+      route=[('07:30','<b>하선</b> → 터미널 앞 관광택시 5시간 대절 NT$3,500~4,500 (≈15~19만, 3인 1인 6만) · 또는 MSC KEE05'),
+             ('08:10','<b>예류 지질공원</b> (NT$120) — 여왕머리·버섯바위 해안 산책 1시간 20분. 바람 셈, 모자'),
+             ('09:50','<b>진산 옛거리</b> — 고구마 간식·오리고기, 30분'),
+             ('10:40','<b>지우펀</b> — 아메이 찻집에서 차 한 잔(NT$300), 옛거리 계단은 엄마 무릎 보며 절반만 · 1시간 30분'),
+             ('12:40','지우펀 or 지룽 <b>점심</b> — 우육면·딤섬 (1인 NT$250~400)'),
+             ('14:00','<b>지룽 묘구 야시장</b> 낮 영업 구경 + 딤수이 커피 · 항구 도보 10분'),
+             ('16:00','승선 (마감 17:30)')],
+      tip='타이베이 시내(101·고궁)까지 가면 왕복 2시간이 길에 갑니다. 엄마와는 <b>예류 + 지우펀</b> 반나절이 제일 만족도 높음. 비 오면 지우펀 대신 <b>고궁박물원</b>(KEE50).'),
+ dict(key='miyako', hero='hero_miyako', en='Day 4 · Miyakojima', nm='미야코지마', tm='12/17(목) 08:00 ~ 18:00 (10시간)',
+      intro='"미야코 블루"로 불리는 바다. 히라라항에서 <b>요나하 마에하마 해변 20분 · 이라부 대교 20분 · 히가시헨나자키 40분</b>. 12월 낮 22도, 수영은 무리지만 해변 산책·다리 드라이브가 절정. 미야코소바·망고.',
+      exc=[('MMY58','요나하 마에하마 + 쿠리마 대교','3h','절경','동양 최고 백사장 마에하마 + 쿠리마 대교 전망. <b>짧고 걷기 적음</b>',True),
+           ('MMY57','파노라마 이라부섬','3.5h','절경','이라부 대교(3.5km, 무료 다리 일본 최장) + 도구치 해변 + 전망대',False),
+           ('MMY51','미야코지마 절경 투어','6h','절경','이라부 대교 + 히가시헨나자키 + 마에하마 + 점심',False),
+           ('MMY56','미야코지마 베스트','7h','시티투어','섬 전체 + 우에노 독일문화촌 + 점심',False),
+           ('MMY53','이라부섬 숨은 명소','4.1h','자연','도리이케(바닷물 웅덩이) + 사와다 해변 + 이라부 대교',False),
+           ('MMY54','히가시헨나자키 + 독일문화촌','3.4h','절경','동쪽 끝 곶 등대 + 우에노 독일문화촌',False),
+           ('MMY59','홉온홉오프 버스','8.4h','자유','섬 순환버스 자유 승하차. 8시간',False)],
+      route=[('08:00','<b>하선</b> → 히라라항 택시 3시간 대절 10,000~13,000엔 (1인 4만)'),
+             ('08:30','<b>요나하 마에하마</b> — 7km 백사장 산책 40분 · 쿠리마 대교 건너 전망대'),
+             ('10:00','<b>이라부 대교</b> 드라이브 + 도구치 해변 사진 · 40분'),
+             ('11:30','시내 <b>미야코소바</b> 점심(900엔) · 망고 디저트 · 시마라쿄 구경'),
+             ('13:30','<b>히라라 시내</b> 산책 또는 파이나가마 비치(항구 도보 15분)에서 휴식'),
+             ('16:00','승선 (마감 17:30) · 마지막 밤 — 스파·갈라 디너·쇼')],
+      tip='마지막 기항지라 오후를 비워 두는 게 좋습니다. <b>15시 승선 → 스파 → 갈라 디너 → 쇼</b>가 칠순 마지막 밤 코스. 렌터카는 국제면허 필요라 택시가 편함.'),
+]
+
+def img_attr(key):
+    return f'data-img="{key}"'
+
+# ---- HTML: 객실 ----
+cab_cards = ''
+for c in CABINS:
+    cab_cards += f'''<div class="pc tap{' best' if c['best'] else ''}" tabindex="0" data-open="{c['key']}"><img {img_attr(c['img'])} alt="{esc(c['nm'])} (MSC 공식)"><div class="in">
+<div class="nm">{c['nm']}</div><div class="sz">{c['sz']}</div>
+<div class="won">{c['won']}<small>{c['unit']}</small></div>
+<div class="ds">{c['ds']}</div><span class="more">사진·정보 더 보기 →</span></div></div>\n'''
+
+cabin_sec = f'''<div class="sec" id="cabins">
+<div class="sechd"><div class="hp" style="background-image:url({{{{IMG:balcony}}}})"></div><div class="tx">
+<div class="en">Cabins</div><h3>🛏 객실 — 누르면 사진과 정보가 열립니다</h3><div class="sub">3인 요금은 트립닷컴·크루즈TMK 9/12 실조회 · 사진은 MSC 공식</div>
+</div><div class="cnt">4종</div></div>
+<div class="photo3" style="grid-template-columns:repeat(4,1fr)">
+{cab_cards}</div>
+<div class="note" style="margin-top:18px"><b>객실 판단</b> — 3인 1실이 되는 상품이면 그게 답입니다(엄마 + 작은언니 침대, 나는 소파베드). 추천은 <b>디럭스 발코니 BR1, 8~10층</b>. 화장실 1개 · 4박이면 감당 가능.</div>
+</div>
+'''
+
+# ---- HTML: 시설 ----
+CATS = [('all','전부'),('dine','정찬·뷔페'),('spec','유료 레스토랑'),('bar','바·라운지'),('show','쇼·파티'),('play','놀거리'),('relax','수영장·스파')]
+fac_cards = ''
+for i, f in enumerate(FAC):
+    tag = {'free': '<span class="pin p-free">요금 포함</span>', 'pay': '<span class="pin p-pay">유료</span>'}[f['tag']]
+    pick = '<span class="pin p-pick">엄마 추천</span>' if f.get('pick') else ''
+    fac_cards += f'''<div class="fc" data-cat="{f['cat']}" tabindex="0" data-open="fac{i}"><img {img_attr(f['img'])} alt="{esc(f['nm'])}"><div class="in">
+<div class="nm">{f['nm']}</div><div class="ds">{f['ds']}</div>
+<div class="ft">{tag}{pick}<span class="more" style="margin:0 0 0 auto">자세히 →</span></div></div></div>\n'''
+cat_btns = ''.join(f'<button type="button" data-cat="{k}"{" class=\"on\"" if k=="all" else ""}>{v}<b>{len(FAC) if k=="all" else sum(1 for f in FAC if f["cat"]==k)}</b></button>' for k, v in CATS)
+
+fac_sec = f'''<div class="sec" id="ship">
+<div class="sechd"><div class="hp" style="background-image:url({{{{IMG:galleria}}}})"></div><div class="tx">
+<div class="en">On board</div><h3>🍽 배 안 시설 전부 — 누르면 사진과 설명</h3><div class="sub">레스토랑 10 · 바 20 · 극장 · 수영장 · 스파 · 볼링 · F1 — MSC 공식 사진 43장</div>
+</div><div class="cnt">{len(FAC)}곳</div></div>
+<div class="cats">{cat_btns}</div>
+<div class="fgrid" id="fgrid">
+{fac_cards}</div>
+<div class="two" style="margin-top:20px">
+<div class="note"><b>요금에 들어 있는 것</b> — 정찬 4곳 · 뷔페 · 룸서비스(판타스티카 무료) · 런던극장 쇼 · 갤러리아 돔 쇼·파티 · 수영장·자쿠지·아쿠아파크 · 헬스장 · 스포츠플렉스 · 물·커피·차·아침 주스 · 데일리 프로그램 클래스 대부분</div>
+<div class="warn"><b>따로 내는 것</b> — 술·탄산·생수병·스페셜티 커피 · 유료 레스토랑 5곳 · 카루셀 쇼 · 스파·열탕 · 볼링·F1·빙고 · 인터넷 · 기항지 투어 · 선상팁 $18/박 · 사진 인화 · 일본 출국세 3,000엔. 선내 통화는 <b>미국 달러</b>, 선실 카드로 달아두고 마지막 날 카드 결제.</div>
+</div>
+</div>
+'''
+
+# ---- HTML: 유료 옵션 ----
+opt_sec = '''<div class="sec" id="options">
+<div class="sechd"><div class="hp" style="background-image:url({{IMG:skylounge}})"></div><div class="tx">
+<div class="en">Add-ons</div><h3>💳 살 수 있는 옵션 — 뭘 사고 뭘 안 사도 되나</h3><div class="sub">MSC 공식 패키지 내용 + 가격은 2025~26 아시아 사전구매가 기준 대략. 예약 후 MSC for Me 앱·크루즈TMK에서 확정</div>
+</div><div class="cnt">6가지</div></div>
+<div class="tbl"><table>
+<thead><tr><th>옵션</th><th>들어 있는 것</th><th class="num">1인 (추정)</th><th>우리 판단</th></tr></thead>
+<tbody>
+<tr><td><b>이지 음료 패키지</b><br><small>Easy Package</small></td><td>생맥주·병맥주(지정), 하우스 와인·스파클링 잔, 하우스 스피릿 클래식 칵테일, 탄산·주스·커피·차, AQUA 물. 하루 알코올 15잔까지. 유료 레스토랑에선 불가</td><td class="num">$38~48 / 1박</td><td>세 명 중 술 드시는 분이 하루 3잔 이상이면 이득. 아니면 낱잔</td></tr>
+<tr><td><b>프리미엄 엑스트라</b><br><small>Premium Extra</small></td><td>스페셜티 커피, 에너지드링크, 생과일 칵테일·스무디, 프리미엄 와인·스피릿·칵테일, 병 와인·샴페인 할인</td><td class="num">$70~85 / 1박</td><td>우리 여행엔 과함</td></tr>
+<tr><td><b>무알코올 패키지</b><br><small>Alcohol-Free</small></td><td>스페셜티 커피·차, 탄산·에너지, 주스·스무디, 무알코올 맥주·와인·칵테일, AQUA 물</td><td class="num">$28~34 / 1박</td><td>엄마용 후보. 단, 일반 커피·차·물은 <b>원래 무료</b>라 탄산·스무디를 자주 드셔야 본전</td></tr>
+<tr><td><b>인터넷</b><br><small>Browse / Browse&Stream</small></td><td>1기기 기준. 브라우즈(카톡·웹) / 스트림(영상)</td><td class="num">4박 $40~50 / $60~80</td><td><b>안 사도 됨</b> — 매일 기항하니 일본·대만 로밍(하루 1만 원대) 또는 e심으로 충분. 배에선 카톡 잠깐만</td></tr>
+<tr><td><b>스페셜티 다이닝 패키지</b></td><td>웰컴 어보드(첫날 1끼) / 1끼 / 2~4끼 묶음. 부처스컷·카이토·홀라·씨파빌리온</td><td class="num">1끼 $35~55 · 3끼 $100~130</td><td>칠순 저녁 <b>부처스컷 1끼</b>만 사전 구매(온라인이 선내보다 쌈)</td></tr>
+<tr><td><b>스파 열탕 구역 · 마사지</b></td><td>사우나·스팀·소금방·열탕 침대 / 발리니즈 마사지</td><td class="num">패스 $30~40 / 마사지 50분 $130~170</td><td>엄마 마사지 1회 = 칠순 선물 항목. 첫날 "포트 데이 할인" 전단 보고 예약</td></tr>
+<tr><td><b>기항지 투어 (MSC)</b></td><td>버스·가이드(영어/일부 중국어·일본어)·입장료. 배가 기다려줌</td><td class="num">3시간 $60~80 · 5시간 $90~130</td><td>이시가키·미야코는 택시 대절이 더 싸고 편함. <b>지룽만 MSC KEE05</b> 또는 택시</td></tr>
+<tr><td><b>선상팁</b></td><td>객실·식당 승무원 서비스료. 자동으로 선실 계정에</td><td class="num">$18 × 4박 = $72</td><td>필수. 3인 $216 ≈ 29만</td></tr>
+</tbody></table>
+<div class="tnote">MSC 규정: 같은 객실 성인은 <b>모두 같은 음료 패키지</b>를 사야 합니다(한 명만 살 수 없음). 그래서 셋 중 한 명만 술이면 패키지 말고 낱잔이 답. 낱잔 값: 맥주 $6~8 · 와인 $8~12 · 칵테일 $10~14 + 15% 서비스료.</div></div>
+<div class="note" style="margin-top:14px"><b>우리 집 결론</b> — 사전 구매는 <b>부처스컷 1끼(칠순 저녁) + 엄마 마사지</b> 두 개. 음료 패키지·인터넷은 사지 않고, 기항지는 택시 대절(이시가키·미야코) + 지룽만 MSC 투어. 추가 예산 3인 약 <b>60~80만</b>.</div>
+</div>
+'''
+
+# ---- HTML: 기항지 ----
+port_html = ''
+XDATA = {}
+for p in PORTS:
+    xc = ''
+    for code, nm, dur, cat, ds, best in p['exc']:
+        key = 'x_' + code
+        has_img = code in IMG
+        img = f'<img {img_attr(code)} alt="{esc(nm)}">' if has_img else ''
+        xc += f'''<div class="xc{' best' if best else ''}" tabindex="0" data-open="{key}">{img}<div class="in"><div class="nm">{nm}</div><div class="mt">{dur} · {cat} · {code}{' · <b style="color:#a75a25">엄마 추천</b>' if best else ''}</div></div></div>\n'''
+        XDATA[key] = dict(img=code if has_img else p['hero'], en=f'MSC Excursion {code}', title=nm, sub=f'{dur} · {cat} · {p["nm"]}',
+                          tags=[('pay', '유료 · MSC 투어'), ('pick', '엄마 추천')] if best else [('pay', '유료 · MSC 투어')],
+                          body=f'<p>{ds}</p><p><b>MSC 공식 투어 코드 {code}.</b> 가격은 로그인 후 표시(비슷한 길이 아시아 투어 기준 3시간 $60~80, 5시간 $90~130, 7시간 $130~180). 영어 가이드 기본, 일부 투어는 중국어·일본어. 배가 투어 귀환을 기다려 주므로 늦어도 안전. 예약은 크루즈TMK 예약 완료 후 MSC for Me 앱 또는 승선 후 투어 데스크.</p><div class="tip">비슷한 코스를 <b>택시 대절</b>로 하면 3인 기준 대체로 절반 값입니다. 다만 배 시간에 늦으면 배가 안 기다리니 출항 90분 전엔 항구에.</div>')
+    route = ''.join(f'<li><span class="t">{t_}</span>{txt}</li>' for t_, txt in p['route'])
+    port_html += f'''<div class="port" id="port-{p['key']}">
+<div class="phead"><img {img_attr(p['hero'])} alt="{esc(p['nm'])}"><div class="pt"><div class="en">{p['en']}</div><h3>{p['nm']}</h3><div class="tm">⏱ {p['tm']}</div></div></div>
+<div class="pbody">
+<p style="font-size:15px;color:var(--ink2);line-height:1.7">{p['intro']}</p>
+<div class="two">
+<div><h3 style="font-size:20px;margin-bottom:6px">🚕 우리끼리 루트 (엄마 걸음 기준)</h3><ol class="route2">{route}</ol>
+<div class="note" style="margin-top:12px">{p['tip']}</div></div>
+<div><h3 style="font-size:20px;margin-bottom:6px">🎫 MSC 공식 투어 {len(p['exc'])}개 — 누르면 설명</h3><div class="xgrid">{xc}</div></div>
+</div>
+</div></div>
+'''
+
+port_sec = f'''<div class="sec" id="ports">
+<div class="sechd"><div class="hp" style="background-image:url({{{{IMG:pool}}}})"></div><div class="tx">
+<div class="en">Ports of call</div><h3>🗺 기항지 4곳 — 시간표 · 우리끼리 루트 · MSC 투어</h3><div class="sub">MSC 공식 투어 목록 39개는 msccruises.com 기항지 페이지에서 그대로 가져옴 · 사진도 MSC 공식</div>
+</div><div class="cnt">4곳</div></div>
+{port_html}
+<div class="note"><b>공통 규칙</b> — 배는 출항 시각에 정확히 떠납니다. MSC 투어가 아니면 <b>출항 90분 전</b>엔 항구에. 여권은 배에 두고 <b>크루즈 카드 + 여권 사본</b>만 들고 내리는 게 원칙(일본은 크루즈 카드로 입출국 처리, 대만은 여권 지참 안내가 있을 수 있으니 전날 데일리 프로그램 확인). 엔화·대만달러는 소액 현금(택시·시장)만, 나머지는 카드.</div>
+</div>
+'''
+
+t = t[:start] + open(D+'hotel_sec.html', encoding='utf-8').read() + cabin_sec + fac_sec + opt_sec + port_sec + t[end:]
+t = t.replace('<!--HOTEL_SEC-->', '')
+
+# ── 5. 드로어 데이터 + JS ─────────────────────────────────────
+DRAW = {}
+for c in CABINS:
+    DRAW[c['key']] = dict(img=c['img'], gal=c['gal'], en='Cabin', title=c['nm'], sub=c['sz'], tags=[('pick','추천') if c['best'] else ('free','3인 1실 가능')], body=c['body'])
+for i, f in enumerate(FAC):
+    tags = [('free','요금 포함') if f['tag']=='free' else ('pay','유료')]
+    if f.get('pick'): tags.append(('pick','엄마 추천'))
+    DRAW[f'fac{i}'] = dict(img=f['img'], gal=f.get('gal', []), en='On board', title=f['title'], sub=f['sub'], tags=tags, body=f['body'])
+for k, v in XDATA.items():
+    DRAW[k] = dict(img=v['img'], gal=[], en=v['en'], title=v['title'], sub=v['sub'], tags=v['tags'], body=v['body'])
+
+drawer_html = '''
+<div class="dim" id="dim"></div>
+<aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-label="상세 정보">
+<div class="dhead"><img id="d-img" alt=""><button type="button" class="dclose" id="d-close" aria-label="닫기">×</button></div>
+<div class="dbody"><div class="den" id="d-en"></div><h3 id="d-title"></h3><div class="dsub" id="d-sub"></div><div class="dtags" id="d-tags"></div><div class="gal" id="d-gal"></div><div id="d-body"></div></div>
+</aside>
+'''
+js = '''
+<script>
+const IMG = __IMG__;
+const DRAW = __DRAW__;
+document.querySelectorAll('[data-img]').forEach(el=>{const k=el.getAttribute('data-img'); if(IMG[k]) el.src=IMG[k];});
+const drawer=document.getElementById('drawer'), dim=document.getElementById('dim');
+let lastFocus=null;
+function openDrawer(key){const d=DRAW[key]; if(!d) return; lastFocus=document.activeElement;
+ document.getElementById('d-img').src=IMG[d.img]||''; document.getElementById('d-en').textContent=d.en; document.getElementById('d-title').textContent=d.title; document.getElementById('d-sub').textContent=d.sub;
+ document.getElementById('d-tags').innerHTML=d.tags.map(t=>'<span class="'+t[0]+'">'+t[1]+'</span>').join('');
+ const g=document.getElementById('d-gal'); g.innerHTML=d.gal.filter(k=>IMG[k]).map(k=>'<img src="'+IMG[k]+'" alt="">').join(''); g.style.display=g.innerHTML?'grid':'none';
+ document.getElementById('d-body').innerHTML=d.body; drawer.scrollTop=0;
+ drawer.classList.add('on'); dim.classList.add('on'); drawer.setAttribute('aria-hidden','false'); document.body.classList.add('lock'); document.getElementById('d-close').focus();}
+function closeDrawer(){drawer.classList.remove('on'); dim.classList.remove('on'); drawer.setAttribute('aria-hidden','true'); document.body.classList.remove('lock'); if(lastFocus) lastFocus.focus();}
+document.querySelectorAll('[data-open]').forEach(el=>{el.addEventListener('click',()=>openDrawer(el.getAttribute('data-open'))); el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); openDrawer(el.getAttribute('data-open'));}});});
+document.getElementById('d-close').addEventListener('click',closeDrawer); dim.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeDrawer();});
+document.querySelectorAll('.cats button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.cats button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); const c=b.getAttribute('data-cat'); document.querySelectorAll('#fgrid .fc').forEach(f=>{f.hidden=!(c==='all'||f.getAttribute('data-cat')===c);});}));
+</script>
+'''
+t = t.replace('</footer>', '</footer>' + drawer_html + js)
+
+# ── 6. 이미지 주입 ────────────────────────────────────────────
+used = set(re.findall(r'data-img="([^"]+)"', t)) | set()
+for d in DRAW.values():
+    used.add(d['img']); used.update(d['gal'])
+IMG_used = {k: IMG[k] for k in used if k in IMG}
+missing = [k for k in used if k not in IMG]
+t = t.replace('__IMG__', json.dumps(IMG_used)).replace('__DRAW__', json.dumps(DRAW, ensure_ascii=False))
+b['hero_naha'] = ports['hero_naha']
+t = re.sub(r'\{\{IMG:(\w+)\}\}', lambda m: b[m.group(1)], t)
+open(OUT, 'w', encoding='utf-8').write(t)
+print('written', len(t)//1024, 'KB; images', len(IMG_used), 'missing', missing)
