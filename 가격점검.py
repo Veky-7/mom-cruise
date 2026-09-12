@@ -2,9 +2,10 @@
 """엄마 칠순 크루즈 — 트립닷컴 가격 점검 (매일 09:00, 작업 스케줄러)
 읽는 것: 크루즈 12/06 · 12/14 · 12/22 객실별 최저가 + 항공 12/13 · 12/14 인천→나하, 12/18 나하→인천 (항공점검.py, 헤드리스 크롬)
 남기는 것: 가격이력.json(표의 원본) · 가격로그.txt(사람이 읽는 한 줄) · docs/price.html(휴대폰용 비교표 → 깃허브)
+보내는 것: 매일 텔레그램 @ysaios_bot 으로 요약 한 장 (변동 있으면 맨 위에 🔔)
 알리는 것(윈도우 알림 + 바탕화면 파일): 어제보다 3만 원 이상 오르내림 · 역대 최저 갱신 · 매진 · 조회 실패
 """
-import urllib.request, gzip, re, json, datetime, os, subprocess, sys
+import urllib.request, urllib.parse, gzip, re, json, datetime, os, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:
     import 항공점검
@@ -131,6 +132,69 @@ def analyze(hist, today_day, vals):
         if past and v < min(past):
             alerts.append(f'⭐ {name} 역대 최저 {v:,}')
     return alerts
+
+# ───────── 텔레그램 (@ysaios_bot · 토큰은 secrets/ 에서만) ─────────
+SEC = 'D:/0_YS_AIOS/secrets'
+PAGE_URL = 'https://veky-7.github.io/mom-cruise/price.html'
+
+def tg_text(hist, today_day):
+    """휴대폰 한 화면. 위: 판정 · 가운데: 12/14 객실 + 항공 · 아래: 3인 합계 · 링크. 한글은 폭이 달라 표 정렬 대신 줄마다 한 항목"""
+    days = sorted(hist)
+    prev = [d for d in days if d < today_day]; prev = prev[-1] if prev else None
+    base = BASE_DAY if BASE_DAY in hist else days[0]
+    tv, pv, bv = hist[today_day]['v'], (hist[prev]['v'] if prev else {}), hist[base]['v']
+    best = hist[today_day].get('best', {})
+    alerts, fails = hist[today_day].get('alerts', []), hist[today_day].get('fails', [])
+
+    def d_(now, old):
+        return diff_txt(now, old)[0] or '－'
+    def item(name, key, extra=''):
+        v = tv.get(key)
+        if v is None:
+            return f'• {name}  ⚠ 조회 실패'
+        if v == '매진':
+            return f'• {name}  ⛔ 매진'
+        past = [hist[d]['v'].get(key) for d in days if d != today_day and isinstance(hist[d]['v'].get(key), int)]
+        star = '  ⭐최저' if past and v < min(past) else ''
+        return f'• {name}  <b>{v:,}</b>  (어제 {d_(v, pv.get(key))} · 기준 {d_(v, bv.get(key))}){star}{extra}'
+
+    md = today_day[5:].replace('-', '/')
+    if alerts:
+        head = '🔔 <b>가격 변동 있음</b>\n' + '\n'.join(alerts)
+    elif fails:
+        head = f'⚠ 일부 조회 실패: {", ".join(map(str, fails))} (나머지는 정상)'
+    else:
+        head = '✅ 어제와 변동 없음'
+
+    lines = [f'🚢 <b>엄마 칠순 크루즈 · {md} 아침 가격</b>', head, '', '📅 <b>12/14 출항</b> · 1인(2인1실)']
+    lines += [item(c, f'C|12-14|{c}') for c in CABINS]
+    lines += ['', '✈ <b>항공 최저</b> · 1인·수하물 포함']
+    for l in LEGS:
+        k = f'F|{l}'
+        lines.append(item(l, k, f'\n   └ {best[k]}' if best.get(k) else ''))
+
+    go, back, cv = tv.get('F|12/14 인천→나하'), tv.get('F|12/18 나하→인천'), tv.get('C|12-14|내측')
+    if all(isinstance(x, int) for x in (go, back, cv)):
+        one = cv + go + back
+        bo = (bv.get('C|12-14|내측'), bv.get('F|12/14 인천→나하'), bv.get('F|12/18 나하→인천'))
+        bt = sum(bo) if all(isinstance(x, int) for x in bo) else None
+        lines += ['', f'👨‍👩‍👧 <b>3인 합계</b> (내측 + 항공 왕복)  <b>{one * 3:,}원</b>' + (f'  (기준 {d_(one * 3, bt * 3)})' if bt else '')]
+    others = ' · '.join(f'{d[5:].replace("-", "/")} {fmt(tv.get(f"C|{d[5:]}|내측"))}' for d in DATES[1:])
+    lines += ['', f'다른 날 내측: {others}',
+              f'기준 = {base[5:].replace("-", "/")} 첫 조회 · 어제 = {prev[5:].replace("-", "/") if prev else "－"}',
+              f'📊 표로 보기 → {PAGE_URL}']
+    return '\n'.join(lines)
+
+def telegram(text):
+    try:
+        token = open(os.path.join(SEC, 'telegram_bot_token.txt'), encoding='utf-8').read().strip()
+        cid = open(os.path.join(SEC, 'telegram_chat_id.txt'), encoding='utf-8').read().strip()
+        data = urllib.parse.urlencode({'chat_id': cid, 'text': text, 'parse_mode': 'HTML', 'disable_web_page_preview': '1'}).encode()
+        r = urllib.request.urlopen(urllib.request.Request(f'https://api.telegram.org/bot{token}/sendMessage', data=data), timeout=20)
+        return json.load(r).get('ok', False)
+    except Exception as e:
+        print('텔레그램 실패:', str(e)[:120])
+        return False
 
 # ───────── 휴대폰용 페이지 ─────────
 def build_page(hist, today_day):
@@ -271,6 +335,7 @@ def main():
             print('푸시 실패:', r.stderr.strip()[:200])
     except Exception as e:
         print('페이지 갱신 실패:', e)
+    telegram(tg_text(hist, today))
     print(line)
 
 if __name__ == '__main__':
