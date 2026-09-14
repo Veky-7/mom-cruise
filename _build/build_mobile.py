@@ -5,7 +5,7 @@ from PIL import Image
 
 import os
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
-OUT = 'D:/정이서/엄마칠순/엄마칠순_크루즈_2차안_모바일.html'
+OUT = 'D:/home/엄마칠순/엄마칠순_크루즈_2차안_모바일.html'
 spec = importlib.util.spec_from_file_location('data', D+'data.py'); data = importlib.util.module_from_spec(spec); spec.loader.exec_module(data)
 CABINS, FAC, PORTS = data.CABINS, data.FAC, data.PORTS
 
@@ -237,11 +237,11 @@ P = []
 P.append(f'''<div class="top"><span class="d">70th</span><span class="t">엄마 칠순 크루즈</span><span class="d">Naha 12/14</span></div>
 <div class="wrap">
 <div class="hero">
-<div class="script">For Mom's 70th birthday · 김현순</div>
+<div class="script">For Mom's 70th birthday</div>
 <h1>엄마 칠순<br><em>크루즈 여행</em> 2차안</h1>
 <div class="shot"><div class="fr"><img data-img="{use('hero_wide',720)}" alt="MSC 벨리시마"></div></div>
 <div class="chips"><span>🌊 17만 톤 · 5,655명</span><span>🌴 12월에도 낮 20도</span><span>👩‍👩‍👧 세 식구 한 방</span></div>
-<p>9/18 부산 출발이 안 되면서 올해 한국 출발 대형선은 끝. 일본·대만·중국·홍콩 출발 큰 배를 다 뒤져 <b>나하(오키나와) 출발 MSC 벨리시마 12/14</b>로 거의 확정. <b>김현순</b> 어머니 · <b>정이서</b> · <b>정해민</b>, 셋이서.</p>
+<p>9/18 부산 출발이 안 되면서 올해 한국 출발 대형선은 끝. 일본·대만·중국·홍콩 출발 큰 배를 다 뒤져 <b>나하(오키나와) 출발 MSC 벨리시마 12/14</b>로 거의 확정. <b>엄마</b> · <b>나</b> · <b>작은언니</b>, 셋이서.</p>
 <div class="cta"><a class="solid" href="#ship">🚢 배 안 구경</a><a class="ghost" href="#ports">🗺 기항지 루트</a></div>
 </div>
 <div class="badges">
@@ -395,7 +395,7 @@ P.append(TORN('#faf0ee') + '''<div class="band rose" id="others"><div class="wra
 </div></div>''' + TORN('#fbf6ee') + '''<div class="wrap" id="next" style="padding-top:20px">
 <div class="shead"><div class="script">Before we book</div><h2>확인할 것 · 다음 액션</h2></div>
 <div class="card"><div class="nm">✅ 바로 확인</div><ul class="check">
-<li><i></i><span><b>여권 3명</b> (김현순·정이서·정해민) — 2027-06-18 이후 만료</span></li>
+<li><i></i><span><b>여권 3명</b> (엄마·나·작은언니) — 2027-06-18 이후 만료</span></li>
 <li><i></i><span>해민 언니 휴가 12/14(월)~12/18(금), 전날 안이면 12/13(일)부터</span></li>
 <li><i></i><span>해외 결제 카드 — 전액 결제</span></li>
 <li><i></i><span>엄마 12월 일정(병원 등)</span></li></ul></div>

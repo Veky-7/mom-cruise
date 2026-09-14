@@ -4,7 +4,7 @@ import json, re, html
 
 import os
 D = os.path.dirname(os.path.abspath(__file__)) + '/'
-OUT = 'D:/정이서/엄마칠순/엄마칠순_크루즈_2차안.html'
+OUT = 'D:/home/엄마칠순/엄마칠순_크루즈_2차안.html'
 
 b = json.load(open(D+'b64.json'))          # hero, mini, cabins, galleria... (기존)
 ship = json.load(open(D+'ship_b64.json'))  # s_* 선내 시설 43장
