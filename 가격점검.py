@@ -2,7 +2,7 @@
 """엄마 칠순 크루즈 — 트립닷컴 가격 점검 (매일 09:00, 작업 스케줄러)
 읽는 것: 크루즈 12/06 · 12/14 · 12/22 객실별 최저가 + 항공 12/13 · 12/14 인천→나하, 12/18 나하→인천 (항공점검.py, 헤드리스 크롬)
 남기는 것: 가격이력.json(표의 원본) · 가격로그.txt(사람이 읽는 한 줄) · docs/price.html(휴대폰용 비교표 → 깃허브)
-보내는 것: 매일 텔레그램 @ysaios_bot 으로 요약 한 장 (변동 있으면 맨 위에 🔔)
+텔레그램(@ysaios_bot): 자동으로는 안 보낸다. 대표가 시킬 때만 `python 가격점검.py --텔레그램` (조회 다시 하고 요약 전송)
 알리는 것(윈도우 알림 + 바탕화면 파일): 어제보다 3만 원 이상 오르내림 · 역대 최저 갱신 · 매진 · 조회 실패
 """
 import urllib.request, urllib.parse, gzip, re, json, datetime, os, subprocess, sys
@@ -335,7 +335,9 @@ def main():
             print('푸시 실패:', r.stderr.strip()[:200])
     except Exception as e:
         print('페이지 갱신 실패:', e)
-    telegram(tg_text(hist, today))
+    # 텔레그램은 대표가 시킬 때만 (2026-09-15 지시) — 자동 실행(09:00)은 안 보낸다
+    if '--텔레그램' in sys.argv:
+        print('텔레그램:', '보냄' if telegram(tg_text(hist, today)) else '실패')
     print(line)
 
 if __name__ == '__main__':
